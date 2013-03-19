@@ -90,7 +90,7 @@ function(name, context) {
 ### Action methods
 Action methods are properties on controllers, like the "bar" thing we did up
 above. They should always return some kind of `Result` object. Specifically,
-that object needs to have an `execute` function on it. There are five
+that object needs to have an `execute` function on it. There are six
 built-in `Result` objects:
 
 1. `ActionResult(content[, contentType])` - simply sends whatever content you give it
@@ -105,6 +105,8 @@ built-in `Result` objects:
 	* `new goa.ViewResult('index.jade', { message: 'Welcome!' });`
 5. `ErrorResult(error[, statusCode = 500])` - delegates to Express's error handler
 	* `new goa.ErrorResult(new Error('Verboten!'), 403);`
+6. `RedirectResult(location[, statusCode = 302])` - redirects to `location`
+	* `new goa.RedirectResult('/foo');`
 
 All result objects should have an `execute(res, next)` function, if you decide to
 implement your own.
@@ -132,13 +134,13 @@ MyController.prototype = {
 
 	save: function(params, callback) {
 		var record = { content: params.content };
-		this.db.insert(record, function(err) {
+		this.db.insert(record, function(err, result) {
 			if (err) {
 				callback(new ErrorResult(err));
 				return;
 			}
 
-			callback(new ViewResult('insert-success.jade'));
+			callback(new RedirectResult('/edit/' + result.id));
 		});
 	}
 };

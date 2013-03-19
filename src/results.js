@@ -60,10 +60,19 @@ ErrorResult.prototype.execute = function(res, next) {
 	next(this.error);
 };
 
+function RedirectResult(url, statusCode) {
+	this.url = url;
+	this.statusCode = statusCode || 302;
+}
+RedirectResult.prototype.execute = function(res) {
+	res.redirect(this.statusCode, this.url);
+};
+
 module.exports = {
 	ActionResult: ActionResult,
 	JsonResult: JsonResult,
 	FileResult: FileResult,
 	ViewResult: ViewResult,
-	ErrorResult: ErrorResult
+	ErrorResult: ErrorResult,
+	RedirectResult: RedirectResult
 };

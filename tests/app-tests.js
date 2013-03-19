@@ -285,5 +285,25 @@ describe('Goa', function() {
 				done();
 			});
 		});
+
+		it('redirect result', function(done) {
+			new goa.RedirectResult('/foo').execute({
+				redirect: function(statusCode, url) {
+					statusCode.should.equal(302);
+					url.should.equal('/foo');
+					done();
+				}
+			});
+		});
+
+		it('redirect result with custom status code', function(done) {
+			new goa.RedirectResult('/foo', 301).execute({
+				redirect: function(statusCode, url) {
+					statusCode.should.equal(301);
+					url.should.equal('/foo');
+					done();
+				}
+			});
+		});
 	});
 });

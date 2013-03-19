@@ -43,6 +43,9 @@ describe('Integration with Express', function() {
 			},
 			download: function(params, callback) {
 				callback(new goa.FileResult(__dirname + '/files/file.txt', { fileName: 'lol.txt' }));
+			},
+			redirect: function(params, callback) {
+				callback(new goa.RedirectResult('/foo'));
 			}
 		};
 	}
@@ -116,6 +119,18 @@ describe('Integration with Express', function() {
 		sendGetRequest('/download', function(res, body) {
 			res.headers.should.have.property('content-disposition', 'attachment; filename="lol.txt"');
 			body.should.equal('this is a file');
+			done();
+		});
+	});
+
+	it('should redirect', function(done) {
+		var app = goa(expressApp, { controllerFactory: createController });
+		app.get('/redirect', { controller: 'foo', action: 'redirect' });
+		server = expressApp.listen(port);
+
+		sendGetRequest('/redirect', function(res) {
+			res.headers.should.have.property('location', '/foo');
+			res.should.have.property('statusCode', 302);
 			done();
 		});
 	});
