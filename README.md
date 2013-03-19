@@ -5,7 +5,7 @@
 Goa is a very small, very simple MVCish framework for Node. I say
 "MVCish" because it's built on top of [Express](http://expressjs.com/)
 which already handles views. So it's more like an "MC" framework.
-Except it doesn't much with models, either. Whatever. It does
+Except it doesn't do much with models, either. Whatever. It does
 SOMETHING, I'm sure of it.
 
 If you've used ASP.NET MVC at all, some of the idioms may look familiar.
