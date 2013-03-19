@@ -1,10 +1,13 @@
 var should = require('should'),
-	express = require('express'),
 	goa = require('../');
 
 describe('Goa', function() {
 	it('should raise error if express object not passed to constructor', function() {
-		(function() { goa(); }).should.throwError();
+		(function() { goa(null, { controllerFactory: function() {} }); }).should.throwError();
+	});
+
+	it('should raise error if controllerFactory option not passed to constructor', function() {
+		(function() { goa({}); }).should.throwError();
 	});
 
 	describe('request handling', function() {

@@ -1,12 +1,7 @@
 var methods = require('methods'),
 	results = require('./results'),
 	defaultOptions = {
-		defaultAction: 'index',
-		controllerFactory: function(controllerName, context) {
-			var name = controllerName.charAt(0) + controllerName.substring(1) + 'Controller',
-				controllerClass = require(name);
-			return new controllerClass(context);
-		}
+		defaultAction: 'index'
 	},
 	merge = function() {
 		var original = arguments[0], override = true, start = 1;
@@ -43,9 +38,15 @@ function Goa(express, options) {
 	}
 
 	options = merge({}, defaultOptions, options);
+
+	if (typeof(options.controllerFactory) !== 'function') {
+		throw new Error('A controllerFactory function must be specified in options');
+	}
+
 	this.express = express;
 	this.controllerFactory = options.controllerFactory;
 	this.defaultAction = options.defaultAction;
+
 }
 
 Goa.prototype.middleware = function(actionParams) {
