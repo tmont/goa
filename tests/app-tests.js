@@ -88,11 +88,6 @@ describe('Goa', function() {
 	});
 
 	describe('middleware', function() {
-		function createController(name, context) {
-			var Controller = require('./controllers/' + name);
-			return new Controller(context);
-		}
-
 		it('should execute default action', function(done) {
 			function fakeController(name, context) {
 				name.should.equal('foo');
@@ -100,13 +95,13 @@ describe('Goa', function() {
 				context.should.have.property('res');
 				context.should.have.property('next');
 				return {
-					index: function(params) {
+					index: function(params, callback) {
 						should.exist(params);
-						return {
+						callback({
 							execute: function(res, next) {
 								done();
 							}
-						};
+						});
 					}
 				};
 			}
@@ -132,13 +127,13 @@ describe('Goa', function() {
 				context.should.have.property('res');
 				context.should.have.property('next');
 				return {
-					bar: function(params) {
+					bar: function(params, callback) {
 						should.exist(params);
-						return {
+						callback({
 							execute: function(res, next) {
 								done();
 							}
-						};
+						});
 					}
 				};
 			}
@@ -158,7 +153,7 @@ describe('Goa', function() {
 		});
 
 		it('should raise error if controller cannot be created', function(done) {
-			function fakeController(name, context) {
+			function fakeController(name) {
 				name.should.equal('foo');
 				return null;
 			}

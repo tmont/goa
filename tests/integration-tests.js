@@ -29,20 +29,20 @@ describe('Integration with Express', function() {
 
 	function createController(name, context) {
 		return {
-			content: function() {
-				return new goa.ActionResult('oh hai there!');
+			content: function(params, callback) {
+				callback(new goa.ActionResult('oh hai there!'));
 			},
-			view: function() {
-				return new goa.ViewResult('default', { message: 'foo bar' });
+			view: function(params, callback) {
+				callback(new goa.ViewResult('default', { message: 'foo bar' }));
 			},
-			error: function() {
-				return new goa.ErrorResult('lolz');
+			error: function(params, callback) {
+				callback(new goa.ErrorResult('lolz'));
 			},
-			file: function() {
-				return new goa.FileResult(__dirname + '/files/file.txt');
+			file: function(params, callback) {
+				callback(new goa.FileResult(__dirname + '/files/file.txt'));
 			},
-			download: function() {
-				return new goa.FileResult(__dirname + '/files/file.txt', { fileName: 'lol.txt' });
+			download: function(params, callback) {
+				callback(new goa.FileResult(__dirname + '/files/file.txt', { fileName: 'lol.txt' }));
 			}
 		};
 	}
@@ -124,8 +124,8 @@ describe('Integration with Express', function() {
 		var app = goa(expressApp, { controllerFactory: function(name) {
 			name.should.equal('bar');
 			return {
-				content: function() {
-					return new goa.ActionResult('oh hai there!');
+				content: function(params, callback) {
+					callback(new goa.ActionResult('oh hai there!'));
 				}
 			}
 		}});
@@ -145,8 +145,8 @@ describe('Integration with Express', function() {
 			it('should handle ' + method.toUpperCase() + ' request', function(done) {
 				var app = goa(expressApp, { controllerFactory: function() {
 					return {
-						index: function() {
-							return new goa.ActionResult('oh hai there!');
+						index: function(params, callback) {
+							callback(new goa.ActionResult('oh hai there!'));
 						}
 					}
 				}});

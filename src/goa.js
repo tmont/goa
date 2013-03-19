@@ -65,7 +65,9 @@ Goa.prototype.middleware = function(actionParams) {
 			return;
 		}
 
-		(controller[action](params) || new results.ActionResult()).execute(res, next);
+		controller[action](params, function(result) {
+			result.execute(res, next);
+		});
 	}.bind(this);
 };
 
