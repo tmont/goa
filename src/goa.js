@@ -46,7 +46,6 @@ function Goa(express, options) {
 	this.express = express;
 	this.controllerFactory = options.controllerFactory;
 	this.defaultAction = options.defaultAction;
-
 }
 
 Goa.prototype.middleware = function(actionParams) {
@@ -85,6 +84,11 @@ methods.forEach(function(method) {
 	Goa.prototype[method] = function() {
 		var middleware = Array.prototype.slice.call(arguments),
 			actionParams = middleware.pop();
+
+		if (typeof(actionParams) !== 'object') {
+			middleware.push(actionParams);
+			actionParams = {};
+		}
 
 		middleware.push(this.middleware(actionParams));
 		this.express[method].apply(this.express, middleware);
