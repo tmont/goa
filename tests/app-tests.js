@@ -218,14 +218,67 @@ describe('Goa', function() {
 			goa.action('foo', 'text/html').execute(createResponse('text/html', 'foo', done));
 		});
 
+		it('default result with status code', function(done) {
+			var statusSet = false;
+			goa.action('foo', 'text/html', { statusCode: 201 }).execute({
+				set: function(name, value) {
+					name.should.equal('Content-Type');
+					value.should.equal('text/html');
+				},
+				status: function(statusCode) {
+					statusCode.should.equal(201);
+					statusSet = true;
+				},
+				send: function(content) {
+					content.should.equal('foo');
+					statusSet.should.equal(true);
+					done();
+				}
+			});
+		});
+
 		it('json result', function(done) {
 			goa.json({ foo: 'bar' }).execute(createResponse('application/json', { foo: 'bar' }, done));
+		});
+
+		it('json result with status code', function(done) {
+			var statusSet = false;
+			goa.json({ foo: 'bar' }, { statusCode: 201 }).execute({
+				set: function(name, value) {
+					name.should.equal('Content-Type');
+					value.should.equal('application/json');
+				},
+				status: function(statusCode) {
+					statusCode.should.equal(201);
+					statusSet = true;
+				},
+				send: function(content) {
+					content.should.eql({ foo: 'bar' });
+					statusSet.should.equal(true);
+					done();
+				}
+			});
 		});
 
 		it('file result', function(done) {
 			goa.file('file.txt').execute({
 				sendfile: function(file) {
 					file.should.equal('file.txt');
+					done();
+				}
+			});
+		});
+
+		it('file result with status code', function(done) {
+			var statusSet = false;
+			goa.file('file.txt', { statusCode: 204 }).execute({
+				status: function(statusCode) {
+					statusCode.should.equal(204);
+					statusSet = true;
+				},
+				sendfile: function(file) {
+					file.should.equal('file.txt');
+					statusSet.should.equal(true);
 					done();
 				}
 			});
@@ -246,6 +299,22 @@ describe('Goa', function() {
 				render: function(view, params) {
 					view.should.equal('view.jade');
 					params.should.eql({ foo: 'bar' });
+					done();
+				}
+			});
+		});
+
+		it('view result with status code', function(done) {
+			var statusSet = false;
+			goa.view('view.jade', { foo: 'bar' }, { statusCode: 201 }).execute({
+				status: function(statusCode) {
+					statusCode.should.equal(201);
+					statusSet = true;
+				},
+				render: function(view, params) {
+					view.should.equal('view.jade');
+					params.should.eql({ foo: 'bar' });
+					statusSet.should.equal(true);
 					done();
 				}
 			});
@@ -286,22 +355,62 @@ describe('Goa', function() {
 			});
 		});
 
+		it('error result with specific status code in options', function(done) {
+			goa.error(null, { statusCode: 499 }).execute({
+				status: function(statusCode) {
+					statusCode.should.equal(499);
+				}
+			}, function(err) {
+				err.should.be.instanceOf(Error);
+				err.should.have.property('message', 'An error occurred');
+				done();
+			});
+		});
+
 		it('redirect result', function(done) {
+			var statusSet = false;
 			goa.redirect('/foo').execute({
 				redirect: function(statusCode, url) {
 					statusCode.should.equal(302);
 					url.should.equal('/foo');
+					statusSet.should.equal(true);
 					done();
+				},
+				status: function(statusCode) {
+					statusCode.should.equal(302);
+					statusSet = true;
 				}
 			});
 		});
 
 		it('redirect result with custom status code', function(done) {
+			var statusSet = false;
 			goa.redirect('/foo', 301).execute({
 				redirect: function(statusCode, url) {
 					statusCode.should.equal(301);
 					url.should.equal('/foo');
+					statusSet.should.equal(true);
 					done();
+				},
+				status: function(statusCode) {
+					statusCode.should.equal(301);
+					statusSet = true;
+				}
+			});
+		});
+
+		it('redirect result with custom status code in options', function(done) {
+			var statusSet = false;
+			goa.redirect('/foo', { statusCode: 301 }).execute({
+				redirect: function(statusCode, url) {
+					statusCode.should.equal(301);
+					url.should.equal('/foo');
+					statusSet.should.equal(true);
+					done();
+				},
+				status: function(statusCode) {
+					statusCode.should.equal(301);
+					statusSet = true;
 				}
 			});
 		});

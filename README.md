@@ -92,23 +92,29 @@ Action methods are properties on controllers, like the "bar" thing we did up
 above. They should always return some kind of `Result` object. There are six
 built-in `Result` objects:
 
-1. `ActionResult(content[, contentType])` - simply sends whatever content you give it
+1. `ActionResult(content[, contentType, options])` - simply sends whatever content you give it
 	* `goa.action('foo bar', 'text/plain');`
-2. `JsonResult(json)` - sends JSON
+2. `JsonResult(json[, options])` - sends JSON
 	* `goa.json({ foo: 'bar' });`
 3. `FileResult(file[, options])` - sends a file (uses `res.sendfile()` and `res.download()`)
 	* `goa.file('/path/to/file');`
 	* `goa.file('/path/to/file', { maxAge: 60000 });`
 	* `goa.file('/path/to/file', { fileName: 'foo.txt' });` - sets `Content-Disposition` header
-4. `ViewResult(view[, params])` - renders a view with optional params
+4. `ViewResult(view[, params, options])` - renders a view with optional params
 	* `goa.view('index.jade', { message: 'Welcome!' });`
-5. `ErrorResult(error[, statusCode = 500])` - delegates to Express's error handler
+5. `ErrorResult(error[, options = 500])` - delegates to Express's error handler
 	* `goa.error(new Error('Verboten!'), 403);`
-6. `RedirectResult(location[, statusCode = 302])` - redirects to `location`
+6. `RedirectResult(location[, options = 302])` - redirects to `location`
 	* `goa.redirect('/foo');`
 
 All result objects should have an `execute(res, next)` function, if you decide to
 implement your own.
+
+Notice that each `Result` constructor has an `options` parameter. This can
+be used for setting the status code of any of the results (it may be used
+for additional things in the future). For `ErrorResult` and `RedirectResult`
+you simply pass a number for the status code, or an object `{ statusCode: 404 }`:
+they are equivalent.
 
 The preferred way of using the built-in result objects is via their factory
 functions on the `goa` object, e.g. `goa.view('myview')`. But, if you like

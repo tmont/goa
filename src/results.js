@@ -1,12 +1,20 @@
 var util = require('util');
 
-function ActionResult(content, contentType) {
+function applyCommonOptions(res, options) {
+	if (options.statusCode) {
+		res.status(options.statusCode);
+	}
+}
+
+function ActionResult(content, contentType, options) {
 	if (content) {
 		this.content = content;
 	}
 	if (contentType) {
 		this.contentType = contentType;
 	}
+
+	this.options = options || {};
 }
 ActionResult.prototype = {
 	contentType: 'text/plain',
@@ -16,12 +24,14 @@ ActionResult.prototype = {
 			res.set('Content-Type', this.contentType);
 		}
 
+		applyCommonOptions(res, this.options);
+
 		res.send(this.content);
 	}
 };
 
-function JsonResult(json) {
-	ActionResult.call(this, json, 'application/json');
+function JsonResult(json, options) {
+	ActionResult.call(this, json, 'application/json', options);
 }
 util.inherits(JsonResult, ActionResult);
 
@@ -31,6 +41,8 @@ function FileResult(file, options) {
 }
 
 FileResult.prototype.execute = function(res) {
+	applyCommonOptions(res, this.options);
+
 	if (this.options.fileName) {
 		res.download(this.file, this.options.fileName);
 		return;
@@ -39,33 +51,39 @@ FileResult.prototype.execute = function(res) {
 	res.sendfile(this.file, this.options);
 };
 
-function ViewResult(viewName, params) {
+function ViewResult(viewName, params, options) {
 	this.view = viewName;
 	this.params = params;
+	this.options = options || {};
 }
 
 ViewResult.prototype.execute = function(res) {
+	applyCommonOptions(res, this.options);
 	res.render(this.view, this.params);
 };
 
-function ErrorResult(err, statusCode) {
+function ErrorResult(err, options) {
 	this.error = err || new Error('An error occurred');
-	this.statusCode = statusCode || 500;
+	this.options = typeof(options) !== 'object' ? {} : (options || {});
+	if (!this.options.statusCode) {
+		this.options.statusCode = typeof(options) === 'number' ? options : 500;
+	}
 }
 ErrorResult.prototype.execute = function(res, next) {
-	if (this.statusCode) {
-		res.status(this.statusCode);
-	}
-
+	applyCommonOptions(res, this.options);
 	next(this.error);
 };
 
-function RedirectResult(url, statusCode) {
+function RedirectResult(url, options) {
 	this.url = url;
-	this.statusCode = statusCode || 302;
+	this.options = typeof(options) !== 'object' ? {} : (options || {});
+	if (!this.options.statusCode) {
+		this.options.statusCode = typeof(options) === 'number' ? options : 302;
+	}
 }
 RedirectResult.prototype.execute = function(res) {
-	res.redirect(this.statusCode, this.url);
+	applyCommonOptions(res, this.options);
+	res.redirect(this.options.statusCode, this.url);
 };
 
 module.exports = {
