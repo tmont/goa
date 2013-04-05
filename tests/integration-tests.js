@@ -30,22 +30,22 @@ describe('Integration with Express', function() {
 	function createController(name, context) {
 		return {
 			content: function(params, callback) {
-				callback(new goa.ActionResult('oh hai there!'));
+				callback(goa.action('oh hai there!'));
 			},
 			view: function(params, callback) {
-				callback(new goa.ViewResult('default', { message: 'foo bar' }));
+				callback(goa.view('default', { message: 'foo bar' }));
 			},
 			error: function(params, callback) {
-				callback(new goa.ErrorResult('lolz'));
+				callback(goa.error('lolz'));
 			},
 			file: function(params, callback) {
-				callback(new goa.FileResult(__dirname + '/files/file.txt'));
+				callback(goa.file(__dirname + '/files/file.txt'));
 			},
 			download: function(params, callback) {
-				callback(new goa.FileResult(__dirname + '/files/file.txt', { fileName: 'lol.txt' }));
+				callback(goa.file(__dirname + '/files/file.txt', { fileName: 'lol.txt' }));
 			},
 			redirect: function(params, callback) {
-				callback(new goa.RedirectResult('/foo'));
+				callback(goa.redirect('/foo'));
 			}
 		};
 	}
@@ -140,7 +140,7 @@ describe('Integration with Express', function() {
 			name.should.equal('bar');
 			return {
 				content: function(params, callback) {
-					callback(new goa.ActionResult('oh hai there!'));
+					callback(goa.action('oh hai there!'));
 				}
 			}
 		}});
@@ -161,7 +161,7 @@ describe('Integration with Express', function() {
 				var app = goa(expressApp, { controllerFactory: function() {
 					return {
 						index: function(params, callback) {
-							callback(new goa.ActionResult('oh hai there!'));
+							callback(goa.action('oh hai there!'));
 						}
 					}
 				}});

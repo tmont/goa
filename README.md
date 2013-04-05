@@ -31,7 +31,7 @@ var express = require('express'),
 		controllerFactory: function(name, params) {
 			return {
 				index: function(params, callback) {
-					callback(new goa.ActionResult('yay!'));
+					callback(goa.action('yay!'));
 				}
 			};
 		}
@@ -89,27 +89,31 @@ function(name, context) {
 
 ### Action methods
 Action methods are properties on controllers, like the "bar" thing we did up
-above. They should always return some kind of `Result` object. Specifically,
-that object needs to have an `execute` function on it. There are six
+above. They should always return some kind of `Result` object. There are six
 built-in `Result` objects:
 
 1. `ActionResult(content[, contentType])` - simply sends whatever content you give it
-	* `new goa.ActionResult('foo bar', 'text/plain');`
+	* `goa.action('foo bar', 'text/plain');`
 2. `JsonResult(json)` - sends JSON
-	* `new goa.JsonResult({ foo: 'bar' });`
+	* `goa.json({ foo: 'bar' });`
 3. `FileResult(file[, options])` - sends a file (uses `res.sendfile()` and `res.download()`)
-	* `new goa.FileResult('/path/to/file');`
-	* `new goa.FileResult('/path/to/file', { maxAge: 60000 });`
-	* `new goa.FileResult('/path/to/file', { fileName: 'foo.txt' });` - sets `Content-Disposition` header
+	* `goa.file('/path/to/file');`
+	* `goa.file('/path/to/file', { maxAge: 60000 });`
+	* `goa.file('/path/to/file', { fileName: 'foo.txt' });` - sets `Content-Disposition` header
 4. `ViewResult(view[, params])` - renders a view with optional params
-	* `new goa.ViewResult('index.jade', { message: 'Welcome!' });`
+	* `goa.view('index.jade', { message: 'Welcome!' });`
 5. `ErrorResult(error[, statusCode = 500])` - delegates to Express's error handler
-	* `new goa.ErrorResult(new Error('Verboten!'), 403);`
+	* `goa.error(new Error('Verboten!'), 403);`
 6. `RedirectResult(location[, statusCode = 302])` - redirects to `location`
-	* `new goa.RedirectResult('/foo');`
+	* `goa.redirect('/foo');`
 
 All result objects should have an `execute(res, next)` function, if you decide to
 implement your own.
+
+The preferred way of using the built-in result objects is via their factory
+functions on the `goa` object, e.g. `goa.view('myview')`. But, if you like
+typing, you can also access their constructors directly off of the
+`goa.results` object: `new goa.results.ViewResult('myview')`.
 
 Action methods are passed a `params` object, which is a conglomeration of `req.params`
 and `req.body`. If you need access to the raw request, you should make sure and inject
@@ -126,7 +130,7 @@ function MyController(context, db) {
 
 MyController.prototype = {
 	index: function(params, callback) {
-		callback(new goa.ViewResult('index.jade', {
+		callback(goa.view('index.jade', {
 			message: 'Welcome',
 			referrer: this.context.req.headers.referer
 		}));
@@ -136,11 +140,11 @@ MyController.prototype = {
 		var record = { content: params.content };
 		this.db.insert(record, function(err, result) {
 			if (err) {
-				callback(new ErrorResult(err));
+				callback(goa.error(err));
 				return;
 			}
 
-			callback(new RedirectResult('/edit/' + result.id));
+			callback(goa.redirect('/edit/' + result.id));
 		});
 	}
 };

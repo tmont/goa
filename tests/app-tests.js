@@ -211,19 +211,19 @@ describe('Goa', function() {
 			}
 		}
 		it('default result', function(done) {
-			new goa.ActionResult().execute(createResponse('text/plain', '', done));
+			goa.action().execute(createResponse('text/plain', '', done));
 		});
 
 		it('default result with content', function(done) {
-			new goa.ActionResult('foo', 'text/html').execute(createResponse('text/html', 'foo', done));
+			goa.action('foo', 'text/html').execute(createResponse('text/html', 'foo', done));
 		});
 
 		it('json result', function(done) {
-			new goa.JsonResult({ foo: 'bar' }).execute(createResponse('application/json', { foo: 'bar' }, done));
+			goa.json({ foo: 'bar' }).execute(createResponse('application/json', { foo: 'bar' }, done));
 		});
 
 		it('file result', function(done) {
-			new goa.FileResult('file.txt').execute({
+			goa.file('file.txt').execute({
 				sendfile: function(file) {
 					file.should.equal('file.txt');
 					done();
@@ -232,7 +232,7 @@ describe('Goa', function() {
 		});
 
 		it('file result as download', function(done) {
-			new goa.FileResult('file.txt', { fileName: 'foo.bar' }).execute({
+			goa.file('file.txt', { fileName: 'foo.bar' }).execute({
 				download: function(file, fileName) {
 					file.should.equal('file.txt');
 					fileName.should.equal('foo.bar');
@@ -242,7 +242,7 @@ describe('Goa', function() {
 		});
 
 		it('view result', function(done) {
-			new goa.ViewResult('view.jade', { foo: 'bar' }).execute({
+			goa.view('view.jade', { foo: 'bar' }).execute({
 				render: function(view, params) {
 					view.should.equal('view.jade');
 					params.should.eql({ foo: 'bar' });
@@ -252,7 +252,7 @@ describe('Goa', function() {
 		});
 
 		it('error result', function(done) {
-			new goa.ErrorResult().execute({
+			goa.error().execute({
 				status: function(statusCode) {
 					statusCode.should.equal(500);
 				}
@@ -264,7 +264,7 @@ describe('Goa', function() {
 		});
 
 		it('error result with specific error', function(done) {
-			new goa.ErrorResult('oh no!').execute({
+			goa.error('oh no!').execute({
 				status: function(statusCode) {
 					statusCode.should.equal(500);
 				}
@@ -275,7 +275,7 @@ describe('Goa', function() {
 		});
 
 		it('error result with specific status code', function(done) {
-			new goa.ErrorResult(null, 502).execute({
+			goa.error(null, 502).execute({
 				status: function(statusCode) {
 					statusCode.should.equal(502);
 				}
@@ -287,7 +287,7 @@ describe('Goa', function() {
 		});
 
 		it('redirect result', function(done) {
-			new goa.RedirectResult('/foo').execute({
+			goa.redirect('/foo').execute({
 				redirect: function(statusCode, url) {
 					statusCode.should.equal(302);
 					url.should.equal('/foo');
@@ -297,7 +297,7 @@ describe('Goa', function() {
 		});
 
 		it('redirect result with custom status code', function(done) {
-			new goa.RedirectResult('/foo', 301).execute({
+			goa.redirect('/foo', 301).execute({
 				redirect: function(statusCode, url) {
 					statusCode.should.equal(301);
 					url.should.equal('/foo');
