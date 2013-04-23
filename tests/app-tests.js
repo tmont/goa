@@ -94,9 +94,9 @@ describe('Goa', function() {
 				context.should.have.property('req');
 				context.should.have.property('res');
 				callback(null, {
-					index: function(params, callback) {
+					index: function(params, send) {
 						should.exist(params);
-						callback({
+						send({
 							execute: function(res, next) {
 								done();
 							}
