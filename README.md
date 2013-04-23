@@ -25,15 +25,14 @@ Inside your sweet app, wherever you're initializing Express, do this:
 ```javascript
 var express = require('express'),
 	goa = require('goa'),
-	expressApp = express(),
-	app = goa(expressApp, {
+	app = goa(express(), {
 		//more on this in a minute
-		controllerFactory: function(name, params) {
-			return {
+		controllerFactory: function(name, context, callback) {
+			callback(null, {
 				index: function(params, callback) {
 					callback(goa.action('yay!'));
 				}
-			};
+			});
 		}
 	});
 ```
@@ -77,13 +76,13 @@ then your `foo` controller better look like this:
 You can set up your controller factory however you want. Here's a sample one:
 
 ```javascript
-function(name, context) {
+function(name, context, callback) {
 	//"foo" => "FooController"
 	var className = name.charAt(0).toUpperCase() + name.substring(1) + 'Controller';
 
 	//assuming the file name is "controllers/FooController.js"
 	var Controller = require('./controllers/' + className);
-	return new Controller(context);
+	callback(null, new Controller(context));
 }
 ```
 
