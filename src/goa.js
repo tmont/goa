@@ -52,21 +52,28 @@ Goa.prototype.middleware = function(actionParams) {
 	return function(req, res, next) {
 		var params = Goa.parseRequest(req, actionParams),
 			controllerName = params.controller,
-			action = params.action || this.defaultAction,
-			controller = this.controllerFactory(params.controller, { req: req, res: res, next: next });
+			action = params.action || this.defaultAction;
 
-		if (!controller) {
-			next(new Error('Unable to create controller "' + controllerName + '"'));
-			return;
-		}
+		var context = { req: req, res: res };
+		this.controllerFactory(params.controller, context, function(err, controller) {
+			if (err || !controller) {
+				next(err || new Error('Unable to create controller "' + controllerName + '"'));
+				return;
+			}
 
-		if (!controller[action]) {
-			next(new Error('Unable to find action method "' + action + '" on controller ' + '"' + controllerName + '"'));
-			return;
-		}
+			if (!controller[action]) {
+				next(new Error('Unable to find action method "' + action + '" on controller "' + controllerName + '"'));
+				return;
+			}
 
-		controller[action](params, function(result) {
-			result.execute(res, next);
+			controller[action](params, function(result) {
+				if (!result || !result.execute) {
+					next(new Error('Action "' + controllerName + '.' + action + '" does not return a result object'));
+					return;
+				}
+
+				result.execute(res, next);
+			});
 		});
 	}.bind(this);
 };

@@ -89,12 +89,11 @@ describe('Goa', function() {
 
 	describe('middleware', function() {
 		it('should execute default action', function(done) {
-			function fakeController(name, context) {
+			function fakeController(name, context, callback) {
 				name.should.equal('foo');
 				context.should.have.property('req');
 				context.should.have.property('res');
-				context.should.have.property('next');
-				return {
+				callback(null, {
 					index: function(params, callback) {
 						should.exist(params);
 						callback({
@@ -103,7 +102,7 @@ describe('Goa', function() {
 							}
 						});
 					}
-				};
+				});
 			}
 
 			var app = goa({}, {
@@ -121,12 +120,11 @@ describe('Goa', function() {
 		});
 
 		it('should execute specific action', function(done) {
-			function fakeController(name, context) {
+			function fakeController(name, context, callback) {
 				name.should.equal('foo');
 				context.should.have.property('req');
 				context.should.have.property('res');
-				context.should.have.property('next');
-				return {
+				callback(null, {
 					bar: function(params, callback) {
 						should.exist(params);
 						callback({
@@ -135,7 +133,7 @@ describe('Goa', function() {
 							}
 						});
 					}
-				};
+				});
 			}
 
 			var app = goa({}, {
@@ -153,9 +151,9 @@ describe('Goa', function() {
 		});
 
 		it('should raise error if controller cannot be created', function(done) {
-			function fakeController(name) {
+			function fakeController(name, context, callback) {
 				name.should.equal('foo');
-				return null;
+				callback();
 			}
 
 			var app = goa({}, {
@@ -175,9 +173,9 @@ describe('Goa', function() {
 		});
 
 		it('should raise error if action cannot be found on controller', function(done) {
-			function fakeController(name, context) {
+			function fakeController(name, context, callback) {
 				name.should.equal('foo');
-				return {};
+				callback(null, {});
 			}
 
 			var app = goa({}, {

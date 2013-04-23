@@ -27,8 +27,8 @@ describe('Integration with Express', function() {
 		});
 	});
 
-	function createController(name, context) {
-		return {
+	function createController(name, context, callback) {
+		callback(null, {
 			content: function(params, callback) {
 				callback(goa.action('oh hai there!'));
 			},
@@ -47,7 +47,7 @@ describe('Integration with Express', function() {
 			redirect: function(params, callback) {
 				callback(goa.redirect('/foo'));
 			}
-		};
+		});
 	}
 
 	function sendGetRequest(path, callback) {
@@ -136,13 +136,13 @@ describe('Integration with Express', function() {
 	});
 
 	it('should get controller and action from req.params', function(done) {
-		var app = goa(expressApp, { controllerFactory: function(name) {
+		var app = goa(expressApp, { controllerFactory: function(name, context, callback) {
 			name.should.equal('bar');
-			return {
+			callback(null, {
 				content: function(params, callback) {
 					callback(goa.action('oh hai there!'));
 				}
-			}
+			});
 		}});
 		app.get('/:controller/:action');
 		server = expressApp.listen(port);
@@ -158,12 +158,12 @@ describe('Integration with Express', function() {
 
 		methods.concat([ 'del' ]).forEach(function(method) {
 			it('should handle ' + method.toUpperCase() + ' request', function(done) {
-				var app = goa(expressApp, { controllerFactory: function() {
-					return {
+				var app = goa(expressApp, { controllerFactory: function(params, context, callback) {
+					callback(null, {
 						index: function(params, callback) {
 							callback(goa.action('oh hai there!'));
 						}
-					}
+					});
 				}});
 
 				app[method]('/test', { controller: 'foo' });
