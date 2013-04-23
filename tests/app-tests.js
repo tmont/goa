@@ -172,6 +172,53 @@ describe('Goa', function() {
 			app.middleware({ controller: 'foo', action: 'bar' })(req, res, next);
 		});
 
+		it('should raise error if controllerFactory raises an error', function(done) {
+			function fakeController(name, context, callback) {
+				name.should.equal('foo');
+				callback('oh no!');
+			}
+
+			var app = goa({}, {
+				controllerFactory: fakeController
+			});
+
+			var req = {
+					params: {}
+				},
+				res = {},
+				next = function(err) {
+					err.should.equal('oh no!');
+					done();
+				};
+			app.middleware({ controller: 'foo', action: 'bar' })(req, res, next);
+		});
+
+		it('should raise error if result is not passed back', function(done) {
+			function fakeController(name, context, callback) {
+				name.should.equal('foo');
+				callback(null, {
+					bar: function(params, send) {
+						send();
+					}
+				});
+			}
+
+			var app = goa({}, {
+				controllerFactory: fakeController
+			});
+
+			var req = {
+					params: {}
+				},
+				res = {},
+				next = function(err) {
+					err.should.be.instanceOf(Error);
+					err.should.have.property('message', 'Action "foo.bar" does not return a result object');
+					done();
+				};
+			app.middleware({ controller: 'foo', action: 'bar' })(req, res, next);
+		});
+
 		it('should raise error if action cannot be found on controller', function(done) {
 			function fakeController(name, context, callback) {
 				name.should.equal('foo');
