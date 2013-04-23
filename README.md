@@ -29,8 +29,8 @@ var express = require('express'),
 		//more on this in a minute
 		controllerFactory: function(name, context, callback) {
 			callback(null, {
-				index: function(params, callback) {
-					callback(goa.action('yay!'));
+				index: function(params, send) {
+					send(goa.action('yay!'));
 				}
 			});
 		}
@@ -67,7 +67,7 @@ then your `foo` controller better look like this:
 
 ```javascript
 {
-	bar: function(params, callback) {
+	bar: function(params, send) {
 		// do stuff
 	}
 }
@@ -134,14 +134,14 @@ function MyController(context, db) {
 };
 
 MyController.prototype = {
-	index: function(params, callback) {
-		callback(goa.view('index.jade', {
+	index: function(params, send) {
+		send(goa.view('index.jade', {
 			message: 'Welcome',
 			referrer: this.context.req.headers.referer
 		}));
 	},
 
-	save: function(params, callback) {
+	save: function(params, send) {
 		var record = { content: params.content };
 		this.db.insert(record, function(err, result) {
 			if (err) {
@@ -149,7 +149,7 @@ MyController.prototype = {
 				return;
 			}
 
-			callback(goa.redirect('/edit/' + result.id));
+			send(goa.redirect('/edit/' + result.id));
 		});
 	}
 };
