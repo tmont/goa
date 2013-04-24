@@ -69,7 +69,8 @@ function createApplication(controllerFactory, options) {
 		throw new Error('A controller factory function must be given');
 	}
 
-	var app = require('express')(),
+	var express = require('express');
+	var app = express(),
 		curriedMiddleware = function(actionParams) {
 			return middleware(controllerFactory, actionParams, options);
 		};
@@ -96,6 +97,7 @@ function createApplication(controllerFactory, options) {
 	});
 	app.del = app['delete'];
 	app.middleware = curriedMiddleware;
+	app.express = express;
 
 	return app;
 }

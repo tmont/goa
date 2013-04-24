@@ -4,10 +4,9 @@ var should = require('should'),
 	http = require('http');
 
 describe('Integration with Express', function() {
-	var app, server, port = 9999;
+	var server, port = 9999;
 
 	function setExpressOptions(app) {
-		app.use(express.bodyParser());
 		app.set('views', __dirname + '/files');
 		app.set('view engine', 'jade');
 		app.use(app.router);
@@ -156,6 +155,40 @@ describe('Integration with Express', function() {
 			body.should.equal('oh hai there!');
 			done();
 		});
+	});
+
+	it('should expose express prototype', function(done) {
+		var app = goa(function(name, context, callback) {
+			callback(null, {
+				sexyBody: function(params, send) {
+					params.should.have.property('foo', 'bar');
+					send(goa.action());
+				}
+			});
+		});
+		app.use(app.express.bodyParser());
+		setExpressOptions(app);
+		app.post('/sexy/body', { controller: 'foo', action: 'sexyBody' });
+		server = app.listen(port);
+
+		var options = {
+			host: 'localhost',
+			port: port,
+			path: '/sexy/body',
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json'
+			}
+		};
+		var req = http.request(options, function(res) {
+			res.on('data', function(){ });
+			res.on('end', function() {
+				done();
+			});
+		});
+
+		req.write('{ "foo": "bar" }');
+		req.end();
 	});
 
 	describe('different request methods', function() {
