@@ -20,24 +20,33 @@ Goa sits on top of Express. It's Express all the way down. Except for the top.
 Which is Goa.
 
 ### Do the thing
-Inside your sweet app, wherever you're initializing Express, do this:
+Goa is a drop-in replacement for [Express](https://github.com/visionmedia/express):
+all Goa apps are Express apps. Specifically, they are Express 3.2.0 apps.
+
+So, inside your sweet app, wherever you would normally initialize Express, do this
+instead:
 
 ```javascript
-var express = require('express'),
-	goa = require('goa'),
-	app = goa(express(), {
-		//more on this in a minute
-		controllerFactory: function(name, context, callback) {
-			callback(null, {
-				index: function(params, send) {
-					send(goa.action('yay!'));
-				}
-			});
-		}
+var goa = require('goa'),
+	app = goa(function(name, context, callback) {
+		callback(null, {
+			index: function(params, send) {
+				send(goa.action('yay!'));
+			}
+		});
 	});
 ```
 
-That will get your new Goa application up and running.
+That will get your new Goa application up and running. Since it's just a normal
+Express app, you can still `configure()` and `use()` and whatnot to your
+heart's content (note that the `express` index is exposed on `app.express`):
+
+```javascript
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+app.use(app.express.bodyParser());
+app.use(app.router);
+```
 
 ### Adding routes and stuff
 Routing is, literally, the same as Express. Because it delegates to the
@@ -56,10 +65,13 @@ app.get('/awesome', { controller: 'foo', action: 'bar' });
 ### Controllers and factories
 So you need a controller. This *IS* an MC after all.
 
-A controller factory creates controllers. A controller factory is a function
-that takes two arguments: the name of the controller to create (dictated
-from your route handler up there) and a context, which contains stuff
-that might be useful (specifically, the `req`, `res` and `next`).
+A controller factory is a function that creates controllers. It
+takes three arguments:
+
+1. the name of the controller to create (dictated
+   from your route handler up there)
+2. a context, which contains stuff that might be useful (specifically, the `req` and `res`)
+3. a callback in the normal convention: `callback(err, yourSweetController)`
 
 The properties on your controller correspond to actions. So if your
 route handler looks like this: `{ controller: 'foo', action: 'bar' }`,
@@ -145,7 +157,7 @@ MyController.prototype = {
 		var record = { content: params.content };
 		this.db.insert(record, function(err, result) {
 			if (err) {
-				callback(goa.error(err));
+				send(goa.error(err));
 				return;
 			}
 
@@ -168,7 +180,7 @@ controller and action:
 
 ```javascript
 // would handle requests like "/foo/bar" -> "foo" controller, "bar" action
-app.get('/:controller/:action');
+app.get('/:controller/:action', {});
 
 // "/post/edit/1" => "blog" controller, "edit" action; id would be in params.id
 app.get('/post/:action/:id', { controller: 'blog' });
