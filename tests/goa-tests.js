@@ -249,7 +249,7 @@ describe('Goa', function() {
 
 		it('default result with status code', function(done) {
 			var statusSet = false;
-			goa.action('foo', 'text/html', { statusCode: 201 }).execute({
+			goa.action('foo', 'text/html', { status: 201 }).execute({
 				set: function(name, value) {
 					name.should.equal('Content-Type');
 					value.should.equal('text/html');
@@ -272,7 +272,7 @@ describe('Goa', function() {
 
 		it('json result with status code', function(done) {
 			var statusSet = false;
-			goa.json({ foo: 'bar' }, { statusCode: 201 }).execute({
+			goa.json({ foo: 'bar' }, { status: 201 }).execute({
 				set: function(name, value) {
 					name.should.equal('Content-Type');
 					value.should.equal('application/json');
@@ -300,7 +300,7 @@ describe('Goa', function() {
 
 		it('file result with status code', function(done) {
 			var statusSet = false;
-			goa.file('file.txt', { statusCode: 204 }).execute({
+			goa.file('file.txt', { status: 204 }).execute({
 				status: function(statusCode) {
 					statusCode.should.equal(204);
 					statusSet = true;
@@ -335,7 +335,7 @@ describe('Goa', function() {
 
 		it('view result with status code', function(done) {
 			var statusSet = false;
-			goa.view('view.jade', { foo: 'bar' }, { statusCode: 201 }).execute({
+			goa.view('view.jade', { foo: 'bar' }, { status: 201 }).execute({
 				status: function(statusCode) {
 					statusCode.should.equal(201);
 					statusSet = true;
@@ -385,7 +385,7 @@ describe('Goa', function() {
 		});
 
 		it('error result with specific status code in options', function(done) {
-			goa.error(null, { statusCode: 499 }).execute({
+			goa.error(null, { status: 499 }).execute({
 				status: function(statusCode) {
 					statusCode.should.equal(499);
 				}
@@ -430,7 +430,7 @@ describe('Goa', function() {
 
 		it('redirect result with custom status code in options', function(done) {
 			var statusSet = false;
-			goa.redirect('/foo', { statusCode: 301 }).execute({
+			goa.redirect('/foo', { status: 301 }).execute({
 				redirect: function(statusCode, url) {
 					statusCode.should.equal(301);
 					url.should.equal('/foo');

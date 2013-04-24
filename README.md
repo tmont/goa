@@ -124,7 +124,7 @@ implement your own.
 Notice that each `Result` constructor has an `options` parameter. This can
 be used for setting the status code of any of the results (it may be used
 for additional things in the future). For `ErrorResult` and `RedirectResult`
-you simply pass a number for the status code, or an object `{ statusCode: 404 }`:
+you simply pass a number for the status code, or an object `{ status: 404 }`:
 they are equivalent.
 
 The preferred way of using the built-in result objects is via their factory

@@ -1,8 +1,8 @@
 var util = require('util');
 
 function applyCommonOptions(res, options) {
-	if (options.statusCode) {
-		res.status(options.statusCode);
+	if (options.status) {
+		res.status(options.status);
 	}
 }
 
@@ -65,8 +65,8 @@ ViewResult.prototype.execute = function(res) {
 function ErrorResult(err, options) {
 	this.error = err || new Error('An error occurred');
 	this.options = typeof(options) !== 'object' ? {} : (options || {});
-	if (!this.options.statusCode) {
-		this.options.statusCode = typeof(options) === 'number' ? options : 500;
+	if (!this.options.status) {
+		this.options.status = typeof(options) === 'number' ? options : 500;
 	}
 }
 ErrorResult.prototype.execute = function(res, next) {
@@ -77,13 +77,13 @@ ErrorResult.prototype.execute = function(res, next) {
 function RedirectResult(url, options) {
 	this.url = url;
 	this.options = typeof(options) !== 'object' ? {} : (options || {});
-	if (!this.options.statusCode) {
-		this.options.statusCode = typeof(options) === 'number' ? options : 302;
+	if (!this.options.status) {
+		this.options.status = typeof(options) === 'number' ? options : 302;
 	}
 }
 RedirectResult.prototype.execute = function(res) {
 	applyCommonOptions(res, this.options);
-	res.redirect(this.options.statusCode, this.url);
+	res.redirect(this.options.status, this.url);
 };
 
 module.exports = {
