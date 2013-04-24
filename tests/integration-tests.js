@@ -4,18 +4,16 @@ var should = require('should'),
 	http = require('http');
 
 describe('Integration with Express', function() {
-	var expressApp, server, port = 9999;
+	var app, server, port = 9999;
 
-	beforeEach(function() {
-		expressApp = express();
-		expressApp.use(express.bodyParser());
-		expressApp.set('views', __dirname + '/files');
-		expressApp.set('view engine', 'jade');
-		expressApp.use(expressApp.router);
-	});
+	function setExpressOptions(app) {
+		app.use(express.bodyParser());
+		app.set('views', __dirname + '/files');
+		app.set('view engine', 'jade');
+		app.use(app.router);
+	}
 
 	afterEach(function(done) {
-		expressApp = null;
 		if (!server) {
 			done();
 			return;
@@ -63,9 +61,10 @@ describe('Integration with Express', function() {
 	}
 
 	it('should send content', function(done) {
-		var app = goa(expressApp, { controllerFactory: createController });
+		var app = goa(createController);
+		setExpressOptions(app);
 		app.get('/content', { controller: 'foo', action: 'content' });
-		server = expressApp.listen(port);
+		server = app.listen(port);
 
 		sendGetRequest('/content', function(res, body) {
 			body.should.equal('oh hai there!');
@@ -74,9 +73,10 @@ describe('Integration with Express', function() {
 	});
 
 	it('should render view', function(done) {
-		var app = goa(expressApp, { controllerFactory: createController });
+		var app = goa(createController);
+		setExpressOptions(app);
 		app.get('/view', { controller: 'foo', action: 'view' });
-		server = expressApp.listen(port);
+		server = app.listen(port);
 
 		sendGetRequest('/view', function(res, body) {
 			body.should.equal('foo bar');
@@ -85,13 +85,14 @@ describe('Integration with Express', function() {
 	});
 
 	it('should use express error handler for ErrorResult', function(done) {
-		var app = goa(expressApp, { controllerFactory: createController });
-		expressApp.use(function(err, req, res, next) {
+		var app = goa(createController);
+		setExpressOptions(app);
+		app.use(function(err, req, res, next) {
 			err.should.equal('lolz');
 			res.send('yay!');
 		});
 		app.get('/error', { controller: 'foo', action: 'error' });
-		server = expressApp.listen(port);
+		server = app.listen(port);
 
 		sendGetRequest('/error', function(res, body) {
 			res.should.have.property('statusCode', 500);
@@ -101,9 +102,10 @@ describe('Integration with Express', function() {
 	});
 
 	it('should send file', function(done) {
-		var app = goa(expressApp, { controllerFactory: createController });
+		var app = goa(createController);
+		setExpressOptions(app);
 		app.get('/file', { controller: 'foo', action: 'file' });
-		server = expressApp.listen(port);
+		server = app.listen(port);
 
 		sendGetRequest('/file', function(res, body) {
 			body.should.equal('this is a file');
@@ -112,9 +114,10 @@ describe('Integration with Express', function() {
 	});
 
 	it('should download file', function(done) {
-		var app = goa(expressApp, { controllerFactory: createController });
+		var app = goa(createController);
+		setExpressOptions(app);
 		app.get('/download', { controller: 'foo', action: 'download' });
-		server = expressApp.listen(port);
+		server = app.listen(port);
 
 		sendGetRequest('/download', function(res, body) {
 			res.headers.should.have.property('content-disposition', 'attachment; filename="lol.txt"');
@@ -124,9 +127,10 @@ describe('Integration with Express', function() {
 	});
 
 	it('should redirect', function(done) {
-		var app = goa(expressApp, { controllerFactory: createController });
+		var app = goa(createController);
+		setExpressOptions(app);
 		app.get('/redirect', { controller: 'foo', action: 'redirect' });
-		server = expressApp.listen(port);
+		server = app.listen(port);
 
 		sendGetRequest('/redirect', function(res) {
 			res.headers.should.have.property('location', '/foo');
@@ -136,16 +140,17 @@ describe('Integration with Express', function() {
 	});
 
 	it('should get controller and action from req.params', function(done) {
-		var app = goa(expressApp, { controllerFactory: function(name, context, callback) {
+		var app = goa(function(name, context, callback) {
 			name.should.equal('bar');
 			callback(null, {
 				content: function(params, send) {
 					send(goa.action('oh hai there!'));
 				}
 			});
-		}});
-		app.get('/:controller/:action');
-		server = expressApp.listen(port);
+		});
+		setExpressOptions(app);
+		app.get('/:controller/:action', {});
+		server = app.listen(port);
 
 		sendGetRequest('/bar/content', function(res, body) {
 			body.should.equal('oh hai there!');
@@ -158,16 +163,16 @@ describe('Integration with Express', function() {
 
 		methods.concat([ 'del' ]).forEach(function(method) {
 			it('should handle ' + method.toUpperCase() + ' request', function(done) {
-				var app = goa(expressApp, { controllerFactory: function(params, context, callback) {
+				var app = goa(function(params, context, callback) {
 					callback(null, {
 						index: function(params, send) {
 							send(goa.action('oh hai there!'));
 						}
 					});
-				}});
+				});
 
 				app[method]('/test', { controller: 'foo' });
-				server = expressApp.listen(port);
+				server = app.listen(port);
 				var realMethod = method === 'del' ? 'delete' : method;
 				http.request({ host: 'localhost', port: port, path: '/test', method: realMethod },function(res) {
 					var body = '';

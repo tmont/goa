@@ -2,12 +2,8 @@ var should = require('should'),
 	goa = require('../');
 
 describe('Goa', function() {
-	it('should raise error if express object not passed to constructor', function() {
-		(function() { goa(null, { controllerFactory: function() {} }); }).should.throwError();
-	});
-
 	it('should raise error if controllerFactory option not passed to constructor', function() {
-		(function() { goa({}); }).should.throwError();
+		(function() { goa(); }).should.throwError();
 	});
 
 	describe('request handling', function() {
@@ -105,9 +101,7 @@ describe('Goa', function() {
 				});
 			}
 
-			var app = goa({}, {
-				controllerFactory: fakeController
-			});
+			var app = goa(fakeController);
 
 			var req = {
 					params: {}
@@ -136,9 +130,7 @@ describe('Goa', function() {
 				});
 			}
 
-			var app = goa({}, {
-				controllerFactory: fakeController
-			});
+			var app = goa(fakeController);
 
 			var req = {
 					params: {}
@@ -156,9 +148,7 @@ describe('Goa', function() {
 				callback();
 			}
 
-			var app = goa({}, {
-				controllerFactory: fakeController
-			});
+			var app = goa(fakeController);
 
 			var req = {
 					params: {}
@@ -178,9 +168,7 @@ describe('Goa', function() {
 				callback('oh no!');
 			}
 
-			var app = goa({}, {
-				controllerFactory: fakeController
-			});
+			var app = goa(fakeController);
 
 			var req = {
 					params: {}
@@ -203,9 +191,7 @@ describe('Goa', function() {
 				});
 			}
 
-			var app = goa({}, {
-				controllerFactory: fakeController
-			});
+			var app = goa(fakeController);
 
 			var req = {
 					params: {}
@@ -225,9 +211,7 @@ describe('Goa', function() {
 				callback(null, {});
 			}
 
-			var app = goa({}, {
-				controllerFactory: fakeController
-			});
+			var app = goa(fakeController);
 
 			var req = {
 					params: {}

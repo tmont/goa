@@ -1,15 +1,6 @@
 var methods = require('methods'),
-	results = require('./results'),
-	defaultOptions = {
-		defaultAction: 'index'
-	},
 	merge = function() {
-		var original = arguments[0], override = true, start = 1;
-		if (typeof(original) === 'boolean') {
-			override = original;
-			original = arguments[1];
-			start = 2;
-		}
+		var original = arguments[0], start = 1;
 		for (var i = start; i < arguments.length; i++) {
 			var obj = arguments[i];
 			if (typeof(obj) !== 'object') {
@@ -17,7 +8,7 @@ var methods = require('methods'),
 			}
 
 			for (var key in obj) {
-				if (!override && original[key]) {
+				if (original[key]) {
 					continue;
 				}
 
@@ -28,34 +19,25 @@ var methods = require('methods'),
 		return original;
 	};
 
-function Goa(express, options) {
-	if (!(this instanceof Goa)) {
-		return new Goa(express, options);
-	}
-
-	if (!express) {
-		throw new Error('An instance of an Express app is required, e.g. "new GoaApp(express())"');
-	}
-
-	options = merge({}, defaultOptions, options);
-
-	if (typeof(options.controllerFactory) !== 'function') {
-		throw new Error('A controllerFactory function must be specified in options');
-	}
-
-	this.express = express;
-	this.controllerFactory = options.controllerFactory;
-	this.defaultAction = options.defaultAction;
+function parseRequest(req, params) {
+	return merge(
+		{
+			controller: params.controller || req.params.controller,
+			action: params.action || req.params.action
+		},
+		req.params,
+		req.body
+	);
 }
 
-Goa.prototype.middleware = function(actionParams) {
+function middleware(controllerFactory, actionParams, options) {
 	return function(req, res, next) {
-		var params = Goa.parseRequest(req, actionParams),
+		var params = parseRequest(req, actionParams),
 			controllerName = params.controller,
-			action = params.action || this.defaultAction;
+			action = params.action || options.defaultAction;
 
 		var context = { req: req, res: res };
-		this.controllerFactory(params.controller, context, function(err, controller) {
+		controllerFactory(params.controller, context, function(err, controller) {
 			if (err || !controller) {
 				next(err || new Error('Unable to create controller "' + controllerName + '"'));
 				return;
@@ -75,34 +57,48 @@ Goa.prototype.middleware = function(actionParams) {
 				result.execute(res, next);
 			});
 		});
-	}.bind(this);
-};
+	}
+}
 
-Goa.parseRequest = function(req, params) {
-	return merge(false,
-		{
-			controller: params.controller || req.params.controller,
-			action: params.action || req.params.action
-		},
-		req.params,
-		req.body
-	);
-};
-
-methods.forEach(function(method) {
-	Goa.prototype[method] = function() {
-		var middleware = Array.prototype.slice.call(arguments),
-			actionParams = middleware.pop();
-
-		if (typeof(actionParams) !== 'object') {
-			middleware.push(actionParams);
-			actionParams = {};
-		}
-
-		middleware.push(this.middleware(actionParams));
-		this.express[method].apply(this.express, middleware);
+function createApplication(controllerFactory, options) {
+	options = {
+		defaultAction: (options && options.defaultAction) || 'index'
 	};
-});
-Goa.prototype.del = Goa.prototype['delete'];
 
-module.exports = Goa;
+	if (!controllerFactory || typeof(controllerFactory) !== 'function') {
+		throw new Error('A controller factory function must be given');
+	}
+
+	var app = require('express')(),
+		curriedMiddleware = function(actionParams) {
+			return middleware(controllerFactory, actionParams, options);
+		};
+	methods.forEach(function(method) {
+		var parent = app[method];
+		app[method] = function() {
+			//ugly hack from express for when you're trying to "get" a
+			//setting instead of defining a GET route
+			if (method === 'get' && arguments.length === 1) {
+				return this.set(arguments[0]);
+			}
+
+			var middleware = Array.prototype.slice.call(arguments),
+				actionParams = middleware.pop();
+
+			if (typeof(actionParams) !== 'object') {
+				middleware.push(actionParams);
+				actionParams = {};
+			}
+
+			middleware.push(curriedMiddleware(actionParams));
+			return parent.apply(this, middleware);
+		};
+	});
+	app.del = app['delete'];
+	app.middleware = curriedMiddleware;
+
+	return app;
+}
+
+createApplication.parseRequest = parseRequest;
+module.exports = createApplication;
