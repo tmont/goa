@@ -30,6 +30,11 @@ ActionResult.prototype = {
 	}
 };
 
+function EmptyResult(contentType) {
+	ActionResult.call(this, '', contentType, { status: 204 });
+}
+util.inherits(EmptyResult, ActionResult);
+
 function JsonResult(json, options) {
 	ActionResult.call(this, json, 'application/json', options);
 }
@@ -88,6 +93,7 @@ RedirectResult.prototype.execute = function(res) {
 
 module.exports = {
 	ActionResult: ActionResult,
+	EmptyResult: EmptyResult,
 	JsonResult: JsonResult,
 	FileResult: FileResult,
 	ViewResult: ViewResult,

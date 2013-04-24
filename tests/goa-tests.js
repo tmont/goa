@@ -443,5 +443,24 @@ describe('Goa', function() {
 				}
 			});
 		});
+
+		it('empty result', function(done) {
+			var statusSet = false;
+			goa.empty('text/html').execute({
+				set: function(name, value) {
+					name.should.equal('Content-Type');
+					value.should.equal('text/html');
+				},
+				send: function(content) {
+					content.should.equal('');
+					statusSet.should.equal(true);
+					done();
+				},
+				status: function(statusCode) {
+					statusCode.should.equal(204);
+					statusSet = true;
+				}
+			});
+		});
 	});
 });

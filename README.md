@@ -117,6 +117,7 @@ built-in `Result` objects:
 	* `goa.error(new Error('Verboten!'), 403);`
 6. `RedirectResult(location[, options = 302])` - redirects to `location`
 	* `goa.redirect('/foo');`
+7. `EmptyResult([contentType])` - sends an empty response with status `204`
 
 All result objects should have an `execute(res, next)` function, if you decide to
 implement your own.

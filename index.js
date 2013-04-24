@@ -20,5 +20,8 @@ goa.error = function(err, options) {
 goa.redirect = function(url, options) {
 	return new results.RedirectResult(url, options);
 };
+goa.empty = function(contentType) {
+	return new results.EmptyResult(contentType);
+};
 
 module.exports = goa;
