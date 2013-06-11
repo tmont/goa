@@ -69,8 +69,7 @@ So you need a controller. This *IS* an MC after all.
 A controller factory is a function that creates controllers. It
 takes three arguments:
 
-1. the name of the controller to create (dictated
-   from your route handler up there)
+1. the name of the controller to create (dictated from your route handler up there)
 2. a context, which contains stuff that might be useful (specifically, the `req` and `res`)
 3. a callback in the normal convention: `callback(err, yourSweetController)`
 
@@ -134,8 +133,11 @@ functions on the `goa` object, e.g. `goa.view('myview')`. But, if you like
 typing, you can also access their constructors directly off of the
 `goa.results` object: `new goa.results.ViewResult('myview')`.
 
-Action methods are passed a `params` object, which is a conglomeration of `req.params`
-and `req.body`. If you need access to the raw request, you should make sure and inject
+Action methods are passed a `params` object, which is a conglomeration of `req.query`,
+`req.body` and `req.params`, in that order. That is, `req.query.foo` will be overridden
+by `req.body.foo`, whicih will be overridden by `req.params.foo`.
+
+If you need access to the raw request, you should make sure and inject
 the `context` object into your controller and then you can do things like
 `var referrer = context.req.headers.referer;` or something.
 
