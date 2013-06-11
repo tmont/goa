@@ -26,7 +26,8 @@ function parseRequest(req, params) {
 			action: params.action || req.params.action
 		},
 		req.params,
-		req.body
+		req.body,
+		req.query
 	);
 }
 

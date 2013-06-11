@@ -57,6 +57,31 @@ describe('Goa', function() {
 			params.should.have.property('foo', 'bar');
 		});
 
+		it('should add query string params to action params', function() {
+			var params = goa.parseRequest(
+				{ query: { foo: 'bar' } },
+				{ controller: 'foo', action: 'bar' }
+			);
+
+			should.exist(params);
+
+			params.should.have.property('controller', 'foo');
+			params.should.have.property('action', 'bar');
+			params.should.have.property('foo', 'bar');
+		});
+
+		it('should not override controller or action from query', function() {
+			var params = goa.parseRequest(
+				{ query: { controller: 'nope', action: 'nope' } },
+				{ controller: 'foo', action: 'bar' }
+			);
+
+			should.exist(params);
+
+			params.should.have.property('controller', 'foo');
+			params.should.have.property('action', 'bar');
+		});
+
 		it('should not override controller or action from body', function() {
 			var params = goa.parseRequest(
 				{ body: { controller: 'nope', action: 'nope' } },
@@ -67,6 +92,32 @@ describe('Goa', function() {
 
 			params.should.have.property('controller', 'foo');
 			params.should.have.property('action', 'bar');
+		});
+
+		it('should override query from params', function() {
+			var params = goa.parseRequest(
+				{ query: { foo: 'baz' }, params: { foo: 'bar' } },
+				{ controller: 'foo', action: 'bar' }
+			);
+
+			should.exist(params);
+
+			params.should.have.property('controller', 'foo');
+			params.should.have.property('action', 'bar');
+			params.should.have.property('foo', 'bar');
+		});
+
+		it('should override query from body', function() {
+			var params = goa.parseRequest(
+				{ query: { foo: 'baz' }, body: { foo: 'bar' } },
+				{ controller: 'foo', action: 'bar' }
+			);
+
+			should.exist(params);
+
+			params.should.have.property('controller', 'foo');
+			params.should.have.property('action', 'bar');
+			params.should.have.property('foo', 'bar');
 		});
 
 		it('should override body from params', function() {
