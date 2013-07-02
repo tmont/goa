@@ -19,8 +19,8 @@
 	},
 
 	"devDependencies": {
-		"jade": "0.31.2",
-		"mocha": "1.10.0",
+		"jade": "0.32.0",
+		"mocha": "1.12.0",
 		"should": "1.2.2"
 	},
 
