@@ -317,6 +317,25 @@ describe('Goa', function() {
 			});
 		});
 
+		it('default result with implicit status code', function(done) {
+			var statusSet = false;
+			goa.action('foo', 'text/html', 201).execute({
+				set: function(name, value) {
+					name.should.equal('Content-Type');
+					value.should.equal('text/html');
+				},
+				status: function(statusCode) {
+					statusCode.should.equal(201);
+					statusSet = true;
+				},
+				send: function(content) {
+					content.should.equal('foo');
+					statusSet.should.equal(true);
+					done();
+				}
+			});
+		});
+
 		it('json result', function(done) {
 			goa.json({ foo: 'bar' }).execute(createResponse('application/json', { foo: 'bar' }, done));
 		});
@@ -324,6 +343,25 @@ describe('Goa', function() {
 		it('json result with status code', function(done) {
 			var statusSet = false;
 			goa.json({ foo: 'bar' }, { status: 201 }).execute({
+				set: function(name, value) {
+					name.should.equal('Content-Type');
+					value.should.equal('application/json');
+				},
+				status: function(statusCode) {
+					statusCode.should.equal(201);
+					statusSet = true;
+				},
+				send: function(content) {
+					content.should.eql({ foo: 'bar' });
+					statusSet.should.equal(true);
+					done();
+				}
+			});
+		});
+
+		it('json result with implicit status code', function(done) {
+			var statusSet = false;
+			goa.json({ foo: 'bar' }, 201).execute({
 				set: function(name, value) {
 					name.should.equal('Content-Type');
 					value.should.equal('application/json');
@@ -364,6 +402,21 @@ describe('Goa', function() {
 			});
 		});
 
+		it('file result with implicit status code', function(done) {
+			var statusSet = false;
+			goa.file('file.txt', 204).execute({
+				status: function(statusCode) {
+					statusCode.should.equal(204);
+					statusSet = true;
+				},
+				sendfile: function(file) {
+					file.should.equal('file.txt');
+					statusSet.should.equal(true);
+					done();
+				}
+			});
+		});
+
 		it('file result as download', function(done) {
 			goa.file('file.txt', { fileName: 'foo.bar' }).execute({
 				download: function(file, fileName) {
@@ -387,6 +440,22 @@ describe('Goa', function() {
 		it('view result with status code', function(done) {
 			var statusSet = false;
 			goa.view('view.jade', { foo: 'bar' }, { status: 201 }).execute({
+				status: function(statusCode) {
+					statusCode.should.equal(201);
+					statusSet = true;
+				},
+				render: function(view, params) {
+					view.should.equal('view.jade');
+					params.should.eql({ foo: 'bar' });
+					statusSet.should.equal(true);
+					done();
+				}
+			});
+		});
+
+		it('view result with implicit status code', function(done) {
+			var statusSet = false;
+			goa.view('view.jade', { foo: 'bar' }, 201).execute({
 				status: function(statusCode) {
 					statusCode.should.equal(201);
 					statusSet = true;

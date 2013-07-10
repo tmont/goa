@@ -6,6 +6,15 @@ function applyCommonOptions(res, options) {
 	}
 }
 
+function createOptions(options, defaultStatus) {
+	var newOptions = typeof(options) === 'number' ? { status: options } : (options || {});
+	if (defaultStatus && !newOptions.status) {
+		newOptions.status = defaultStatus;
+	}
+
+	return newOptions;
+}
+
 function ActionResult(content, contentType, options) {
 	if (content) {
 		this.content = content;
@@ -13,8 +22,7 @@ function ActionResult(content, contentType, options) {
 	if (contentType) {
 		this.contentType = contentType;
 	}
-
-	this.options = options || {};
+	this.options = createOptions(options);
 }
 ActionResult.prototype = {
 	contentType: 'text/plain',
@@ -42,7 +50,7 @@ util.inherits(JsonResult, ActionResult);
 
 function FileResult(file, options) {
 	this.file = file;
-	this.options = options || {};
+	this.options = createOptions(options);
 }
 
 FileResult.prototype.execute = function(res) {
@@ -59,7 +67,7 @@ FileResult.prototype.execute = function(res) {
 function ViewResult(viewName, params, options) {
 	this.view = viewName;
 	this.params = params;
-	this.options = options || {};
+	this.options = createOptions(options);
 }
 
 ViewResult.prototype.execute = function(res) {
@@ -69,10 +77,7 @@ ViewResult.prototype.execute = function(res) {
 
 function ErrorResult(err, options) {
 	this.error = err || new Error('An error occurred');
-	this.options = typeof(options) !== 'object' ? {} : (options || {});
-	if (!this.options.status) {
-		this.options.status = typeof(options) === 'number' ? options : 500;
-	}
+	this.options = createOptions(options, 500);
 }
 ErrorResult.prototype.execute = function(res, next) {
 	applyCommonOptions(res, this.options);
@@ -81,10 +86,7 @@ ErrorResult.prototype.execute = function(res, next) {
 
 function RedirectResult(url, options) {
 	this.url = url;
-	this.options = typeof(options) !== 'object' ? {} : (options || {});
-	if (!this.options.status) {
-		this.options.status = typeof(options) === 'number' ? options : 302;
-	}
+	this.options = createOptions(options, 302);
 }
 RedirectResult.prototype.execute = function(res) {
 	applyCommonOptions(res, this.options);
