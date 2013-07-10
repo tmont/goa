@@ -49,6 +49,20 @@ app.use(app.express.bodyParser());
 app.use(app.router);
 ```
 
+#### Using your own version of Express
+If you are tied down to a specific version of Express for whatever reason,
+you can also supply your own:
+
+```javascript
+function controllerFactory(name, context, callback) {
+	//...
+}
+
+var app = goa(controllerFactory, {
+	express: require('express')
+});
+```
+
 ### Adding routes and stuff
 Routing is, literally, the same as Express. Because it delegates to the
 default Express routing. So literally any route you were using in your

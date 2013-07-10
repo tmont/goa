@@ -63,15 +63,15 @@ function middleware(controllerFactory, actionParams, options) {
 
 function createApplication(controllerFactory, options) {
 	options = {
-		defaultAction: (options && options.defaultAction) || 'index'
+		defaultAction: (options && options.defaultAction) || 'index',
+		express: (options && options.express) || require('express')
 	};
 
 	if (!controllerFactory || typeof(controllerFactory) !== 'function') {
 		throw new Error('A controller factory function must be given');
 	}
 
-	var express = require('express');
-	var app = express(),
+	var app = options.express(),
 		curriedMiddleware = function(actionParams) {
 			return middleware(controllerFactory, actionParams, options);
 		};
@@ -98,7 +98,7 @@ function createApplication(controllerFactory, options) {
 	});
 	app.del = app['delete'];
 	app.middleware = curriedMiddleware;
-	app.express = express;
+	app.express = options.express;
 
 	return app;
 }

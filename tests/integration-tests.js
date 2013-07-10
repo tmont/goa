@@ -191,6 +191,20 @@ describe('Integration with Express', function() {
 		req.end();
 	});
 
+	it('should allow user-supplied express object', function(done) {
+		var app = goa(createController, {
+			express: require('express')
+		});
+		setExpressOptions(app);
+		app.get('/content', { controller: 'foo', action: 'content' });
+		server = app.listen(port);
+
+		sendGetRequest('/content', function(res, body) {
+			body.should.equal('oh hai there!');
+			done();
+		});
+	});
+
 	describe('different request methods', function() {
 		var methods = require('methods');
 
