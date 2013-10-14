@@ -41,6 +41,12 @@ describe('Integration with Express', function() {
 			download: function(params, send) {
 				send(goa.file(__dirname + '/files/file.txt', { fileName: 'lol.txt' }));
 			},
+			downloadFromUrl: function(params, send) {
+				send(goa.file('http://localhost:9999/file', { fileName: 'lol.txt' }));
+			},
+			fileError: function(params, send) {
+				send(goa.error('lolz'));
+			},
 			redirect: function(params, send) {
 				send(goa.redirect('/foo'));
 			}
@@ -121,6 +127,35 @@ describe('Integration with Express', function() {
 		sendGetRequest('/download', function(res, body) {
 			res.headers.should.have.property('content-disposition', 'attachment; filename="lol.txt"');
 			body.should.equal('this is a file');
+			done();
+		});
+	});
+
+	it('should download file from url', function(done) {
+		var app = goa(createController);
+		setExpressOptions(app);
+		app.get('/download', { controller: 'foo', action: 'downloadFromUrl' });
+		app.get('/file', { controller: 'foo', action: 'file' });
+		server = app.listen(port);
+
+		sendGetRequest('/download', function(res, body) {
+			res.statusCode.should.equal(200);
+			res.headers.should.have.property('content-disposition', 'attachment; filename="lol.txt"');
+			body.should.equal('this is a file');
+			done();
+		});
+	});
+
+	it('should download file from url and handle error', function(done) {
+		var app = goa(createController);
+		setExpressOptions(app);
+		app.get('/download', { controller: 'foo', action: 'downloadFromUrl' });
+		app.get('/file', { controller: 'foo', action: 'fileError' });
+		server = app.listen(port);
+
+		sendGetRequest('/download', function(res, body) {
+			res.statusCode.should.equal(500);
+			body.should.equal('lolz');
 			done();
 		});
 	});

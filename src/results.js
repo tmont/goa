@@ -1,4 +1,6 @@
-var util = require('util');
+var util = require('util'),
+	http = require('http'),
+	https = require('https');
 
 function applyCommonOptions(res, options) {
 	if (options.status) {
@@ -57,6 +59,23 @@ FileResult.prototype.execute = function(res) {
 	applyCommonOptions(res, this.options);
 
 	if (this.options.fileName) {
+		//if it's a URL, we need to pipe it manually
+		var match = /^(\w+):\/\//.exec(this.file);
+		if (match) {
+			var fileName = this.options.fileName;
+			res.setHeader('Content-Disposition', 'attachment; filename="' + fileName + '"');
+			function pipe(httpRes) {
+				res.statusCode = httpRes.statusCode;
+				httpRes.pipe(res);
+			}
+			if (match[1] === 'https') {
+				https.get(this.file, pipe);
+			} else {
+				http.get(this.file, pipe);
+			}
+			return;
+		}
+
 		res.download(this.file, this.options.fileName);
 		return;
 	}

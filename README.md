@@ -125,6 +125,7 @@ built-in `Result` objects:
 	* `goa.file('/path/to/file');`
 	* `goa.file('/path/to/file', { maxAge: 60000 });`
 	* `goa.file('/path/to/file', { fileName: 'foo.txt' });` - sets `Content-Disposition` header
+	* `goa.file('http://example.com/foo.txt');` - acts as reverse proxy
 4. `ViewResult(view[, params, options])` - renders a view with optional params
 	* `goa.view('index.jade', { message: 'Welcome!' });`
 5. `ErrorResult(error[, options = 500])` - delegates to Express's error handler
