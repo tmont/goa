@@ -6,6 +6,9 @@ function applyCommonOptions(res, options) {
 	if (options.status) {
 		res.status(options.status);
 	}
+	if (options.contentType) {
+		res.set('Content-Type', options.contentType);
+	}
 }
 
 function createOptions(options, defaultStatus) {
@@ -21,21 +24,14 @@ function ActionResult(content, contentType, options) {
 	if (content) {
 		this.content = content;
 	}
-	if (contentType) {
-		this.contentType = contentType;
-	}
+	options = options || {};
+	options.contentType = contentType || 'text/plain';
 	this.options = createOptions(options);
 }
 ActionResult.prototype = {
-	contentType: 'text/plain',
 	content: '',
 	execute: function(res) {
-		if (this.contentType) {
-			res.set('Content-Type', this.contentType);
-		}
-
 		applyCommonOptions(res, this.options);
-
 		res.send(this.content);
 	}
 };

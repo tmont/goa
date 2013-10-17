@@ -128,6 +128,7 @@ built-in `Result` objects:
 	* `goa.file('http://example.com/foo.txt');` - acts as reverse proxy
 4. `ViewResult(view[, params, options])` - renders a view with optional params
 	* `goa.view('index.jade', { message: 'Welcome!' });`
+	* `goa.view('index.jade', { message: 'Welcome!' }, { contentType: 'text/xml' });`
 5. `ErrorResult(error[, options = 500])` - delegates to Express's error handler
 	* `goa.error(new Error('Verboten!'), 403);`
 6. `RedirectResult(location[, options = 302])` - redirects to `location`

@@ -469,6 +469,23 @@ describe('Goa', function() {
 			});
 		});
 
+		it('view result with explicit content type', function(done) {
+			var contentTypeSet = false;
+			goa.view('view.jade', { foo: 'bar' }, { contentType: 'text/foo' }).execute({
+				set: function(name, value) {
+					name.should.equal('Content-Type');
+					value.should.equal('text/foo');
+					contentTypeSet = true;
+				},
+				render: function(view, params) {
+					view.should.equal('view.jade');
+					params.should.eql({ foo: 'bar' });
+					contentTypeSet.should.equal(true);
+					done();
+				}
+			});
+		});
+
 		it('error result', function(done) {
 			goa.error().execute({
 				status: function(statusCode) {
