@@ -14,14 +14,14 @@
 	},
 
 	"dependencies": {
-		"express": "3.4.1",
-		"methods": "0.0.1"
+		"express": "3.4.6",
+		"methods": "0.1.0"
 	},
 
 	"devDependencies": {
 		"jade": "0.35.0",
-		"mocha": "1.13.0",
-		"should": "2.0.1"
+		"mocha": "1.15.1",
+		"should": "2.1.1"
 	},
 
 	"scripts": {
