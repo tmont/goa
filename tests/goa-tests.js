@@ -437,6 +437,19 @@ describe('Goa', function() {
 			});
 		});
 
+		it('view result with params as function', function(done) {
+			function p() {
+				return { foo: 'bar' };
+			}
+			goa.view('view.jade', p).execute({
+				render: function(view, params) {
+					view.should.equal('view.jade');
+					params.should.eql({ foo: 'bar' });
+					done();
+				}
+			});
+		});
+
 		it('view result with status code', function(done) {
 			var statusSet = false;
 			goa.view('view.jade', { foo: 'bar' }, { status: 201 }).execute({

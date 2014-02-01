@@ -129,6 +129,7 @@ built-in `Result` objects:
 4. `ViewResult(view[, params, options])` - renders a view with optional params
 	* `goa.view('index.jade', { message: 'Welcome!' });`
 	* `goa.view('index.jade', { message: 'Welcome!' }, { contentType: 'text/xml' });`
+	* `goa.view('index.jade', function() { return { message: 'Welcome!' });`
 5. `ErrorResult(error[, options = 500])` - delegates to Express's error handler
 	* `goa.error(new Error('Verboten!'), 403);`
 6. `RedirectResult(location[, options = 302])` - redirects to `location`

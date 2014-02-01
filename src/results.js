@@ -81,7 +81,7 @@ FileResult.prototype.execute = function(res) {
 
 function ViewResult(viewName, params, options) {
 	this.view = viewName;
-	this.params = params;
+	this.params = typeof(params) === 'function' ? params() : params;
 	this.options = createOptions(options);
 }
 
