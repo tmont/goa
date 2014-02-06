@@ -132,6 +132,19 @@ describe('Goa', function() {
 			params.should.have.property('action', 'bar');
 			params.should.have.property('foo', 'bar');
 		});
+
+		it('should merge extra params', function() {
+			var params = goa.parseRequest(
+				{ body: { foo: 'baz' }, params: { foo: 'bar' } },
+				{ controller: 'foo', action: 'bar', lolwut: 'lulz' }
+			);
+
+			should.exist(params);
+
+			params.should.have.property('controller', 'foo');
+			params.should.have.property('action', 'bar');
+			params.should.have.property('lolwut', 'lulz');
+		});
 	});
 
 	describe('middleware', function() {
