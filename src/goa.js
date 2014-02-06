@@ -21,11 +21,11 @@ var methods = require('methods'),
 
 function parseRequest(req, params) {
 	return merge(
-		params,
 		{
 			controller: params.controller || req.params.controller,
 			action: params.action || req.params.action
 		},
+		params,
 		req.params,
 		req.body,
 		req.query
