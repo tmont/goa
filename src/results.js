@@ -85,9 +85,9 @@ function ViewResult(viewName, params, options) {
 	this.options = createOptions(options);
 }
 
-ViewResult.prototype.execute = function(res) {
+ViewResult.prototype.execute = function(res, next) {
 	applyCommonOptions(res, this.options);
-	res.render(this.view, this.params);
+	res.render(this.view, this.params, next);
 };
 
 function ErrorResult(err, options) {

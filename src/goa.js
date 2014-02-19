@@ -56,7 +56,14 @@ function middleware(controllerFactory, actionParams, options) {
 					return;
 				}
 
-				result.execute(res, next);
+				result.execute(res, function(err, str) {
+					if (err) {
+						next(err);
+						return;
+					}
+
+					res.send(str);
+				});
 			});
 		});
 	}

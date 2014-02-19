@@ -288,6 +288,8 @@ describe('Goa', function() {
 				};
 			app.middleware({ controller: 'foo', action: 'bar' })(req, res, next);
 		});
+
+
 	});
 
 	describe('results', function() {
@@ -510,6 +512,34 @@ describe('Goa', function() {
 					done();
 				}
 			});
+		});
+
+		it('view result that cannot be rendered', function(done) {
+			function fakeController(name, context, callback) {
+				name.should.equal('foo');
+				callback(null, {
+					bar: function(params, send) {
+						send(goa.view('foo', {}));
+					}
+				});
+			}
+
+			var app = goa(fakeController);
+
+			var req = {
+					params: {}
+				},
+				res = {
+					render: function(view, locals, fn) {
+						fn(new Error('fail'));
+					}
+				},
+				next = function(err) {
+					should.exist(err);
+					err.should.have.property('message', 'fail');
+					done();
+				};
+			app.middleware({ controller: 'foo', action: 'bar' })(req, res, next);
 		});
 
 		it('error result', function(done) {
