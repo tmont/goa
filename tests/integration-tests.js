@@ -1,5 +1,5 @@
 var should = require('should'),
-	express = require('express'),
+	bodyParser = require('body-parser'),
 	goa = require('../'),
 	http = require('http');
 
@@ -9,7 +9,6 @@ describe('Integration with Express', function() {
 	function setExpressOptions(app) {
 		app.set('views', __dirname + '/files');
 		app.set('view engine', 'jade');
-		app.use(app.router);
 	}
 
 	afterEach(function(done) {
@@ -92,11 +91,12 @@ describe('Integration with Express', function() {
 	it('should use express error handler for ErrorResult', function(done) {
 		var app = goa(createController);
 		setExpressOptions(app);
+
+		app.get('/error', { controller: 'foo', action: 'error' });
 		app.use(function(err, req, res, next) {
 			err.should.equal('lolz');
 			res.send('yay!');
 		});
-		app.get('/error', { controller: 'foo', action: 'error' });
 		server = app.listen(port);
 
 		sendGetRequest('/error', function(res, body) {
@@ -201,7 +201,7 @@ describe('Integration with Express', function() {
 				}
 			});
 		});
-		app.use(app.express.bodyParser());
+		app.use(bodyParser());
 		setExpressOptions(app);
 		app.post('/sexy/body', { controller: 'foo', action: 'sexyBody' });
 		server = app.listen(port);

@@ -16,13 +16,17 @@ should look very similar.
 ## Installation
 Install via [NPM](https://github.com/isaacs/npm): `npm install goa`
 
+### Legacy Express (3.x)
+If you need legacy support for Express, you should use a version < 1.0.0 from NPM.
+Source code is in the [express3](https://github.com/tmont/goa/tree/express3) branch.
+
 ## Usage
 Goa sits on top of Express. It's Express all the way down. Except for the top.
 Which is Goa.
 
 ### Do the thing
 Goa is a drop-in replacement for [Express](https://github.com/visionmedia/express):
-all Goa apps are Express apps. Specifically, they are Express 3.4.8 apps.
+all Goa apps are Express apps. Specifically, they are Express 4.1.1 apps.
 
 So, inside your sweet app, wherever you would normally initialize Express, do this
 instead:
