@@ -201,7 +201,7 @@ describe('Integration with Express', function() {
 				}
 			});
 		});
-		app.use(bodyParser());
+		app.use(bodyParser.json());
 		setExpressOptions(app);
 		app.post('/sexy/body', { controller: 'foo', action: 'sexyBody' });
 		server = app.listen(port);
