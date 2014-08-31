@@ -155,7 +155,7 @@ describe('Integration with Express', function() {
 
 		sendGetRequest('/download', function(res, body) {
 			res.statusCode.should.equal(500);
-			body.should.equal('lolz');
+			body.should.equal('lolz\n');
 			done();
 		});
 	});
@@ -244,6 +244,12 @@ describe('Integration with Express', function() {
 		var methods = require('methods');
 
 		methods.concat([ 'del' ]).forEach(function(method) {
+			if (method === 'connect') {
+				//don't bother testing connect requests, since those are handled
+				//differently within the http module
+				return;
+			}
+
 			it('should handle ' + method.toUpperCase() + ' request', function(done) {
 				var app = goa(function(params, context, callback) {
 					callback(null, {

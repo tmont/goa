@@ -76,7 +76,7 @@ FileResult.prototype.execute = function(res) {
 		return;
 	}
 
-	res.sendfile(this.file, this.options);
+	res.sendFile(this.file, this.options);
 };
 
 function ViewResult(viewName, params, options) {

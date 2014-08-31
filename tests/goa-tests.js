@@ -395,7 +395,7 @@ describe('Goa', function() {
 
 		it('file result', function(done) {
 			goa.file('file.txt').execute({
-				sendfile: function(file) {
+				sendFile: function(file) {
 					file.should.equal('file.txt');
 					done();
 				}
@@ -409,7 +409,7 @@ describe('Goa', function() {
 					statusCode.should.equal(204);
 					statusSet = true;
 				},
-				sendfile: function(file) {
+				sendFile: function(file) {
 					file.should.equal('file.txt');
 					statusSet.should.equal(true);
 					done();
@@ -424,7 +424,7 @@ describe('Goa', function() {
 					statusCode.should.equal(204);
 					statusSet = true;
 				},
-				sendfile: function(file) {
+				sendFile: function(file) {
 					file.should.equal('file.txt');
 					statusSet.should.equal(true);
 					done();
