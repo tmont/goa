@@ -26,7 +26,7 @@ Which is Goa.
 
 ### Do the thing
 Goa is a drop-in replacement for [Express](https://github.com/visionmedia/express):
-all Goa apps are Express apps. Specifically, they are Express 4.8.7 apps.
+all Goa apps are Express apps. Specifically, they are Express 4.9.4 apps.
 
 So, inside your sweet app, wherever you would normally initialize Express, do this
 instead:
