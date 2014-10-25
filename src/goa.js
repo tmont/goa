@@ -1,34 +1,16 @@
 var methods = require('methods'),
-	merge = function() {
-		var original = arguments[0], start = 1;
-		for (var i = start; i < arguments.length; i++) {
-			var obj = arguments[i];
-			if (typeof(obj) !== 'object') {
-				continue;
-			}
-
-			for (var key in obj) {
-				if (original[key]) {
-					continue;
-				}
-
-				original[key] = obj[key];
-			}
-		}
-
-		return original;
-	};
+	extend = require('extend');
 
 function parseRequest(req, params) {
-	return merge(
+	return extend(
+		req.query,
+		req.body,
+		req.params,
+		params,
 		{
 			controller: params.controller || req.params.controller,
 			action: params.action || req.params.action
-		},
-		params,
-		req.params,
-		req.body,
-		req.query
+		}
 	);
 }
 
