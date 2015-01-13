@@ -14,16 +14,16 @@
 	},
 
 	"dependencies": {
-		"express": "4.10.4",
-		"methods": "1.1.0",
+		"express": "4.10.7",
+		"methods": "1.1.1",
 		"extend": "2.0.0"
 	},
 
 	"devDependencies": {
-		"jade": "1.7.0",
-		"mocha": "2.0.1",
-		"should": "4.1.0",
-		"body-parser": "1.9.1"
+		"jade": "1.9.0",
+		"mocha": "2.1.0",
+		"should": "4.5.1",
+		"body-parser": "1.10.1"
 	},
 
 	"scripts": {
