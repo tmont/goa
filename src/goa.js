@@ -65,7 +65,7 @@ function createApplication(controllerFactory, options) {
 		curriedMiddleware = function(actionParams) {
 			return middleware(controllerFactory, actionParams, options);
 		};
-	methods.forEach(function(method) {
+	methods.concat([ 'all' ]).forEach(function(method) {
 		var parent = app[method];
 		app[method] = function() {
 			//ugly hack from express for when you're trying to "get" a

@@ -1,5 +1,6 @@
 var should = require('should'),
 	bodyParser = require('body-parser'),
+	async = require('async'),
 	goa = require('../'),
 	http = require('http');
 
@@ -238,6 +239,46 @@ describe('Integration with Express', function() {
 			body.should.equal('oh hai there!');
 			done();
 		});
+	});
+
+	it('should support express.all()', function(done) {
+		var app = goa(function(name, context, callback) {
+			callback(null, {
+				all: function(params, send) {
+					send(goa.action(context.req.method));
+				}
+			});
+		});
+		app.use(bodyParser.json());
+		setExpressOptions(app);
+		app.all('/all', {controller: 'foo', action: 'all'});
+		server = app.listen(port);
+
+		function doRequest(method, next) {
+			var options = {
+				host: 'localhost',
+				port: port,
+				path: '/all',
+				method: method,
+				headers: {
+					'content-type': 'application/json'
+				}
+			};
+			var req = http.request(options, function(res) {
+				var body = '';
+				res.on('data', function(chunk) {
+					body += chunk;
+				});
+				res.on('end', function() {
+					body.should.equal(method);
+					next();
+				});
+			});
+
+			req.end();
+		}
+
+		async.eachSeries([ 'GET', 'OPTIONS', 'POST', 'PUT', 'DELETE' ], doRequest, done);
 	});
 
 	describe('different request methods', function() {
