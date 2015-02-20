@@ -12,7 +12,7 @@ function applyCommonOptions(res, options) {
 }
 
 function createOptions(options, defaultStatus) {
-	var newOptions = typeof(options) === 'number' ? { status: options } : (options || {});
+	var newOptions = typeof(options) === 'number' ? {status: options} : (options || {});
 	if (defaultStatus && !newOptions.status) {
 		newOptions.status = defaultStatus;
 	}
@@ -37,7 +37,7 @@ ActionResult.prototype = {
 };
 
 function EmptyResult(contentType) {
-	ActionResult.call(this, '', contentType, { status: 204 });
+	ActionResult.call(this, '', contentType, {status: 204});
 }
 util.inherits(EmptyResult, ActionResult);
 
@@ -54,29 +54,29 @@ function FileResult(file, options) {
 FileResult.prototype.execute = function(res) {
 	applyCommonOptions(res, this.options);
 
-	if (this.options.fileName) {
-		//if it's a URL, we need to pipe it manually
-		var match = /^(\w+):\/\//.exec(this.file);
-		if (match) {
-			var fileName = this.options.fileName;
-			res.setHeader('Content-Disposition', 'attachment; filename="' + fileName + '"');
-			function pipe(httpRes) {
-				res.statusCode = httpRes.statusCode;
-				httpRes.pipe(res);
+	var fileName = this.options.fileName,
+		externalMatch = /^(\w+):\/\//.exec(this.file);
+
+	//if it's a URL, we need to pipe it manually
+	if (externalMatch) {
+		function pipe(httpRes) {
+			res.statusCode = httpRes.statusCode;
+			if (fileName) {
+				res.setHeader('Content-Disposition', 'attachment; filename="' + fileName + '"');
 			}
-			if (match[1] === 'https') {
-				https.get(this.file, pipe);
-			} else {
-				http.get(this.file, pipe);
-			}
-			return;
+			httpRes.pipe(res);
 		}
 
-		res.download(this.file, this.options.fileName);
-		return;
+		if (externalMatch[1] === 'https') {
+			https.get(this.file, pipe);
+		} else {
+			http.get(this.file, pipe);
+		}
+	} else if (fileName) {
+		res.download(this.file, fileName);
+	} else {
+		res.sendFile(this.file, this.options);
 	}
-
-	res.sendFile(this.file, this.options);
 };
 
 function ViewResult(viewName, params, options) {
