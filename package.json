@@ -2,7 +2,7 @@
 	"name": "goa",
 	"version": "1.3.0",
 	"description": "A tiny and simple MVC framework, in the general spirit of ASP.NET MVC",
-	"keywords": [ "mvc", "framework" ],
+	"keywords": [ "mvc", "framework", "express" ],
 	"directories": {
 		"lib": "src"
 	},
