@@ -289,7 +289,34 @@ describe('Goa', function() {
 			app.middleware({ controller: 'foo', action: 'bar' })(req, res, next);
 		});
 
+		it('should call unknown action handler if original action does not exist', function(done) {
 
+			function fakeController(name, context, callback) {
+				name.should.equal('foo');
+				callback(null, {
+					handleUnknownAction: function(params, callback) {
+						should.exist(params);
+						callback({
+							execute: function(res, next) {
+								done();
+							}
+						});
+					}
+				});
+			}
+
+			var app = goa(fakeController);
+
+			var req = {
+					params: {}
+				},
+				res = {},
+				next = function(err) {
+					done('next() should not have been called: ' + err);
+				};
+
+			app.middleware({controller: 'foo', action: 'bar'})(req, res, next);
+		});
 	});
 
 	describe('results', function() {

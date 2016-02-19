@@ -192,6 +192,21 @@ MyController.prototype = {
 };
 ```
 
+#### Unknown Actions
+If an action is attempting to be executed, that doesn't exist on the controller, goa will
+raise an error, which you can handle in your express error handler.
+
+If you want more finegrained control over those errors, you can define a `handleUnknownAction`
+method on your controller.
+
+```javascript
+{
+	handleUnknownAction: function(params, send) {
+		send(goa.view('errors/404', { message: 'That page does not exist' }, 404));
+	}
+}
+```
+
 ### Putting it all together
 So, to set up your routes to use the controller above, you would do something like this:
 

@@ -27,26 +27,36 @@ function middleware(controllerFactory, actionParams, options) {
 				return;
 			}
 
-			if (!controller[action]) {
-				next(new Error('Unable to find action method "' + action + '" on controller "' + controllerName + '"'));
-				return;
-			}
-
-			controller[action](params, function(result) {
-				if (!result || !result.execute) {
-					next(new Error('Action "' + controllerName + '.' + action + '" does not return a result object'));
-					return;
-				}
-
-				result.execute(res, function(err, str) {
-					if (err) {
-						next(err);
+			function runAction(actionName) {
+				controller[actionName](params, function(result) {
+					if (!result || !result.execute) {
+						next(new Error('Action "' + controllerName + '.' + action + '" does not return a result object'));
 						return;
 					}
 
-					res.send(str);
+					result.execute(res, function(err, str) {
+						if (err) {
+							next(err);
+							return;
+						}
+
+						res.send(str);
+					});
 				});
-			});
+			}
+
+			if (typeof(controller[action]) === 'function') {
+				runAction(action);
+				return;
+			}
+
+			var unknownActionName = 'handleUnknownAction';
+			if (typeof(controller[unknownActionName]) === 'function') {
+				runAction(unknownActionName);
+				return;
+			}
+
+			next(new Error('Unable to find action method "' + action + '" on controller "' + controllerName + '"'));
 		});
 	}
 }
