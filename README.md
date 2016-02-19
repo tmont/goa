@@ -156,7 +156,7 @@ typing, you can also access their constructors directly off of the
 
 Action methods are passed a `params` object, which is a conglomeration of `req.query`,
 `req.body` and `req.params`, in that order. That is, `req.query.foo` will be overridden
-by `req.body.foo`, whicih will be overridden by `req.params.foo`.
+by `req.body.foo`, which will be overridden by `req.params.foo`.
 
 If you need access to the raw request, you should make sure and inject
 the `context` object into your controller and then you can do things like
