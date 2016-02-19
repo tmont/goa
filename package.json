@@ -1,6 +1,6 @@
 {
 	"name": "goa",
-	"version": "1.3.1",
+	"version": "1.4.0",
 	"description": "A tiny and simple MVC framework, in the general spirit of ASP.NET MVC",
 	"keywords": [ "mvc", "framework", "express" ],
 	"directories": {
