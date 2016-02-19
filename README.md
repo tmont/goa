@@ -118,7 +118,7 @@ function(name, context, callback) {
 
 ### Action methods
 Action methods are properties on controllers, like the "bar" thing we did up
-above. They should always return some kind of `Result` object. There are six
+above. They should always return some kind of `Result` object. There are seven
 built-in `Result` objects:
 
 1. `ActionResult(content[, contentType, options])` - simply sends whatever content you give it
