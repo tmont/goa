@@ -10,19 +10,16 @@
 		"index.js",
 		"src"
 	],
-
 	"author": "Tommy Montgomery <tmont@tmont.com> (http://tmont.com/)",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/tmont/goa.git"
 	},
-
 	"dependencies": {
-		"express": "4.14.0",
+		"express": "4.15.4",
 		"methods": "1.1.2",
-		"extend": "3.0.0"
+		"extend": "3.0.1"
 	},
-
 	"devDependencies": {
 		"async": "1.5.2",
 		"jade": "1.11.0",
@@ -30,7 +27,6 @@
 		"should": "8.2.2",
 		"body-parser": "1.15.0"
 	},
-
 	"scripts": {
 		"test": "./node_modules/.bin/mocha -R spec tests"
 	}

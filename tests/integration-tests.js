@@ -156,7 +156,7 @@ describe('Integration with Express', function() {
 
 		sendGetRequest('/download', function(res, body) {
 			res.statusCode.should.equal(500);
-			body.should.equal('lolz\n');
+			body.should.equal('<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Error</title>\n</head>\n<body>\n<pre>lolz</pre>\n</body>\n</html>\n');
 			done();
 		});
 	});
