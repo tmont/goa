@@ -163,7 +163,7 @@ class MyController {
 	}
 	
 	save(params, send) {
-		const record = { context: params.content };
+		const record = { content: params.content };
 		this.db.insert(record, (err, result) => {
 	        if (err) {
 	            send(goa.error(err));
