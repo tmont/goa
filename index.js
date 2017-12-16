@@ -1,8 +1,8 @@
-var goa = require('./src/goa');
+const goa = require('./src/goa');
 
-var results = require('./src/results');
+const results = require('./src/results');
 goa.results = results;
-goa.action = function(content, contentType, options) {
+goa.action = (content, contentType, options) => {
 	return new results.ActionResult(content, contentType, options);
 };
 goa.json = function(json, options) {

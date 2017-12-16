@@ -1,7 +1,7 @@
 {
 	"name": "goa",
 	"version": "1.6.0",
-	"description": "A tiny and simple MVC framework, in the general spirit of ASP.NET MVC",
+	"description": "A tiny and simple MVC framework for use with Express",
 	"keywords": [ "mvc", "framework", "express" ],
 	"directories": {
 		"lib": "src"
@@ -15,17 +15,16 @@
 		"type": "git",
 		"url": "https://github.com/tmont/goa.git"
 	},
-	"dependencies": {
-		"express": "4.15.4",
-		"methods": "1.1.2",
-		"extend": "3.0.1"
-	},
 	"devDependencies": {
-		"async": "1.5.2",
-		"jade": "1.11.0",
-		"mocha": "2.4.5",
-		"should": "8.2.2",
-		"body-parser": "1.15.0"
+		"async": "2.6.0",
+		"express": "4.16.2",
+		"pug": "2.0.0-rc.4",
+		"mocha": "4.0.1",
+		"should": "13.1.3",
+		"body-parser": "1.18.2"
+	},
+	"peerDependencies": {
+		"express": "4"
 	},
 	"scripts": {
 		"test": "./node_modules/.bin/mocha -R spec tests"

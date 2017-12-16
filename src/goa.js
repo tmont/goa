@@ -1,40 +1,39 @@
-var methods = require('methods'),
-	extend = require('extend');
+const http = require('http');
 
-function parseRequest(req, params) {
-	return extend(
-		req.query,
-		req.body,
-		req.params,
-		params,
-		{
+const parseRequest = (req, params) => {
+	return {
+		...req.query,
+		...req.body,
+		...req.params,
+		...params,
+		...{
 			controller: params.controller || req.params.controller,
 			action: params.action || req.params.action
 		}
-	);
-}
+	};
+};
 
-function middleware(controllerFactory, actionParams, options) {
-	return function(req, res, next) {
-		var params = parseRequest(req, actionParams),
-			controllerName = params.controller,
-			action = params.action || options.defaultAction;
+const middleware = (controllerFactory, actionParams, options) => {
+	return (req, res, next) => {
+		const params = parseRequest(req, actionParams);
+		const controllerName = params.controller;
+		const action = params.action || options.defaultAction;
 
-		var context = { req: req, res: res };
-		controllerFactory(params.controller, context, function(err, controller) {
+		const context = { req, res };
+		controllerFactory(params.controller, context, (err, controller) => {
 			if (err || !controller) {
 				next(err || new Error('Unable to create controller "' + controllerName + '"'));
 				return;
 			}
 
-			function runAction(actionName) {
+			const runAction = (actionName) => {
 				controller[actionName](params, function(result) {
 					if (!result || !result.execute) {
-						next(new Error('Action "' + controllerName + '.' + action + '" does not return a result object'));
+						next(new Error(`Action "${controllerName}.${action}" does not return a result object`));
 						return;
 					}
 
-					result.execute(res, function(err, str) {
+					result.execute(res, (err, str) => {
 						if (err) {
 							next(err);
 							return;
@@ -43,49 +42,58 @@ function middleware(controllerFactory, actionParams, options) {
 						res.send(str);
 					});
 				});
-			}
+			};
 
 			if (typeof(controller[action]) === 'function') {
 				runAction(action);
 				return;
 			}
 
-			var unknownActionName = 'handleUnknownAction';
+			const unknownActionName = 'handleUnknownAction';
 			if (typeof(controller[unknownActionName]) === 'function') {
 				runAction(unknownActionName);
 				return;
 			}
 
-			next(new Error('Unable to find action method "' + action + '" on controller "' + controllerName + '"'));
+			next(new Error(`Unable to find action method "${action}" on controller "${controllerName}"`));
 		});
 	}
-}
+};
 
-function createApplication(controllerFactory, options) {
+const createApplication = (controllerFactory, options) => {
+	if (!options || !options.express) {
+		throw new Error('options.express is required');
+	}
+
 	options = {
 		defaultAction: (options && options.defaultAction) || 'index',
-		express: (options && options.express) || require('express')
+		express: options.express
 	};
 
 	if (!controllerFactory || typeof(controllerFactory) !== 'function') {
 		throw new Error('A controller factory function must be given');
 	}
 
-	var app = options.express(),
-		curriedMiddleware = function(actionParams) {
-			return middleware(controllerFactory, actionParams, options);
-		};
-	methods.concat([ 'all' ]).forEach(function(method) {
-		var parent = app[method];
-		app[method] = function() {
+	const app = options.express();
+	const curriedMiddleware = (actionParams) => middleware(controllerFactory, actionParams, options);
+
+	const methods = http.METHODS.map(m => m.toLowerCase()).sort().concat([ 'all' ]);
+
+	methods.forEach((method) => {
+		const parent = app[method];
+		if (!parent || typeof(parent) !== 'function') {
+			return;
+		}
+
+		app[method] = (...args) => {
 			//ugly hack from express for when you're trying to "get" a
 			//setting instead of defining a GET route
-			if (method === 'get' && arguments.length === 1) {
-				return this.set(arguments[0]);
+			if (method === 'get' && args.length === 1) {
+				return app.set(args[0]);
 			}
 
-			var middleware = Array.prototype.slice.call(arguments),
-				actionParams = middleware.pop();
+			const middleware = args;
+			let actionParams = middleware.pop();
 
 			if (typeof(actionParams) !== 'object') {
 				middleware.push(actionParams);
@@ -93,7 +101,7 @@ function createApplication(controllerFactory, options) {
 			}
 
 			middleware.push(curriedMiddleware(actionParams));
-			return parent.apply(this, middleware);
+			return parent.apply(app, middleware);
 		};
 	});
 	app.del = app['delete'];
@@ -101,7 +109,7 @@ function createApplication(controllerFactory, options) {
 	app.express = options.express;
 
 	return app;
-}
+};
 
 createApplication.parseRequest = parseRequest;
 module.exports = createApplication;

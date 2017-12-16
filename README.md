@@ -9,10 +9,6 @@ which already handles views. So it's more like an "MC" framework.
 Except it doesn't do much with models, either. Whatever. It does
 SOMETHING, I'm sure of it.
 
-If you've used ASP.NET MVC at all, some of the idioms may look familiar.
-Specifically, the way route parameters and action results are architected
-should look very similar.
-
 ## Installation
 Install via [NPM](https://github.com/isaacs/npm): `npm install goa`
 
@@ -26,20 +22,23 @@ Which is Goa.
 
 ### Do the thing
 Goa is a drop-in replacement for [Express](https://github.com/visionmedia/express):
-all Goa apps are Express apps. Specifically, they are Express 4.15.4 apps.
+all Goa apps are Express apps.
+
+As of v2.0.0, `express` is now a peer dependency which means you must supply
+your own version of `express` to goa.
 
 So, inside your sweet app, wherever you would normally initialize Express, do this
 instead:
 
 ```javascript
-var goa = require('goa'),
-	app = goa(function(name, context, callback) {
-		callback(null, {
-			index: function(params, send) {
-				send(goa.action('yay!'));
-			}
-		});
-	});
+const express = require('express');
+const goa = require('goa');
+
+const createController = (name, context, callback) => callback(null, {
+	index: (params, send) => send(goa.action('yay!'))
+});
+
+const app = goa(createController, { express });
 ```
 
 That will get your new Goa application up and running. Since it's just a normal
@@ -48,23 +47,8 @@ heart's content (note that the `express` index is exposed on `app.express`):
 
 ```javascript
 app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
-app.use(app.express.bodyParser());
-app.use(app.router);
-```
-
-#### Using your own version of Express
-If you are tied down to a specific version of Express for whatever reason,
-you can also supply your own:
-
-```javascript
-function controllerFactory(name, context, callback) {
-	//...
-}
-
-var app = goa(controllerFactory, {
-	express: require('express')
-});
+app.set('view engine', 'pug');
+// etc.
 ```
 
 ### Adding routes and stuff
@@ -82,7 +66,7 @@ app.get('/awesome', { controller: 'foo', action: 'bar' });
 ```
 
 ### Controllers and factories
-So you need a controller. This *IS* an MC after all.
+So you need a controller.
 
 A controller factory is a function that creates controllers. It
 takes three arguments:
@@ -97,7 +81,7 @@ then your `foo` controller better look like this:
 
 ```javascript
 {
-	bar: function(params, send) {
+	bar: (params, send) => {
 		// do stuff
 	}
 }
@@ -106,12 +90,12 @@ then your `foo` controller better look like this:
 You can set up your controller factory however you want. Here's a sample one:
 
 ```javascript
-function(name, context, callback) {
+const controllerFactory = (name, context, callback) => {
 	//"foo" => "FooController"
-	var className = name.charAt(0).toUpperCase() + name.substring(1) + 'Controller';
+	const className = name.charAt(0).toUpperCase() + name.substring(1) + 'Controller';
 
 	//assuming the file name is "controllers/FooController.js"
-	var Controller = require('./controllers/' + className);
+	const Controller = require('./controllers/' + className);
 	callback(null, new Controller(context));
 }
 ```
@@ -165,31 +149,31 @@ the `context` object into your controller and then you can do things like
 So your controller should do something like this:
 
 ```javascript
-function MyController(context, db) {
-	this.context = context;
-	this.db = db;
-};
-
-MyController.prototype = {
-	index: function(params, send) {
-		send(goa.view('index.jade', {
+class MyController {
+	constructor(context, db) {
+		this.context = context;
+		this.db = db;
+	}
+	
+	index(params, send) {
+		send(goa.view('index.pug', {
 			message: 'Welcome',
 			referrer: this.context.req.headers.referer
 		}));
-	},
-
-	save: function(params, send) {
-		var record = { content: params.content };
-		this.db.insert(record, function(err, result) {
-			if (err) {
-				send(goa.error(err));
-				return;
-			}
-
-			send(goa.redirect('/edit/' + result.id));
-		});
 	}
-};
+	
+	save(params, send) {
+		const record = { context: params.content };
+		this.db.insert(record, (err, result) => {
+	        if (err) {
+	            send(goa.error(err));
+	            return;
+	        }
+	
+	        send(goa.redirect(`/edit/${result.id}`));
+	    });
+	}
+}
 ```
 
 #### Unknown Actions
@@ -201,7 +185,7 @@ method on your controller.
 
 ```javascript
 {
-	handleUnknownAction: function(params, send) {
+	handleUnknownAction: (params, send) => {
 		send(goa.view('errors/404', { message: 'That page does not exist' }, 404));
 	}
 }
