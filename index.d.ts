@@ -105,7 +105,7 @@ interface goa {
 	empty(contentType?: string): EmptyResult;
 	json(json: any, options?: ResultOptions | number): JsonResult;
 	file(file: string, options?: ResultOptions | number): FileResult;
-	view(viewName: string, params?: () => any | any, options?: ResultOptions | number): ViewResult;
+	view(viewName: string, params?: any | (() => any), options?: ResultOptions | number): ViewResult;
 	error(err?: any, options?: ResultOptions | number): ErrorResult;
 	redirect(url: string, options?: ResultOptions | number): RedirectResult;
 

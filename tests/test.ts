@@ -25,4 +25,13 @@ app.use((req, res, next) => {
 
 app.set('views', 'foo/bar').set('lol', 'wut');
 
+goa.view('lol', {
+	hello: 'world'
+});
+goa.view('lol', () => {
+	return {
+		hello: 'world'
+	}
+});
+
 app.listen(3000);
