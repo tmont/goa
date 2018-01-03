@@ -30,7 +30,7 @@
 		"express": "4"
 	},
 	"scripts": {
-		"test": "./node_modules/.bin/mocha -R spec -t 6000 tests"
+		"test": "./node_modules/.bin/mocha -R spec -t 10000 tests"
 	},
 	"types": "./index.d.ts"
 }
