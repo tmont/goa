@@ -111,5 +111,7 @@ const createApplication = (controllerFactory, options) => {
 	return app;
 };
 
-createApplication.parseRequest = parseRequest;
-module.exports = createApplication;
+module.exports = {
+	createApplication,
+	parseRequest,
+};

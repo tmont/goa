@@ -24,6 +24,9 @@ Which is Goa.
 Goa is a drop-in replacement for [Express](https://github.com/visionmedia/express):
 all Goa apps are Express apps.
 
+As of v3.0.0, the interface to create an application changed from `goa(...)`
+to `goa.createApplication(...)`.
+
 As of v2.0.0, `express` is now a peer dependency which means you must supply
 your own version of `express` to goa.
 
@@ -38,7 +41,7 @@ const createController = (name, context, callback) => callback(null, {
 	index: (params, send) => send(goa.action('yay!'))
 });
 
-const app = goa(createController, { express });
+const app = goa.createApplication(createController, { express });
 ```
 
 That will get your new Goa application up and running. Since it's just a normal
@@ -164,6 +167,44 @@ class MyController {
 	
 	save(params, send) {
 		const record = { content: params.content };
+		this.db.insert(record, (err, result) => {
+	        if (err) {
+	            send(goa.error(err));
+	            return;
+	        }
+	
+	        send(goa.redirect(`/edit/${result.id}`));
+	    });
+	}
+}
+```
+
+The same in TypeScript: 
+```typescript
+import * as goa from 'goa';
+
+interface SaveParams {
+	content: string;
+}
+
+class MyController {
+	private readonly context: goa.ControllerContext;
+	private readonly db: any;
+	
+	public constructor(context: goa.ControllerContext, db: any) {
+		this.context = context;
+		this.db = db;
+	}
+	
+	index(params: goa.ActionParams, send: goa.Send) {
+		send(goa.view('index.pug', {
+			message: 'Welcome',
+			referrer: this.context.req.headers.referer
+		}));
+	}
+	
+	save(params: goa.ActionParams<SaveParams>, send: goa.Send) {
+		const record: any = { content: params.content };
 		this.db.insert(record, (err, result) => {
 	        if (err) {
 	            send(goa.error(err));

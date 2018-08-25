@@ -4,7 +4,7 @@ const goa = require('../');
 
 describe('Goa', () => {
 	it('should raise error if controllerFactory option not passed to constructor', () => {
-		(() => { goa(); }).should.throwError();
+		(() => { goa.createApplication(); }).should.throwError();
 	});
 
 	describe('request handling', () => {
@@ -166,7 +166,7 @@ describe('Goa', () => {
 				});
 			}
 
-			const app = goa(fakeController, { express });
+			const app = goa.createApplication(fakeController, { express });
 
 			const req = {
 					params: {}
@@ -195,7 +195,7 @@ describe('Goa', () => {
 				});
 			}
 
-			const app = goa(fakeController, { express });
+			const app = goa.createApplication(fakeController, { express });
 
 			const req = {
 					params: {}
@@ -213,7 +213,7 @@ describe('Goa', () => {
 				callback();
 			}
 
-			const app = goa(fakeController, { express });
+			const app = goa.createApplication(fakeController, { express });
 
 			const req = {
 					params: {}
@@ -233,7 +233,7 @@ describe('Goa', () => {
 				callback('oh no!');
 			}
 
-			const app = goa(fakeController, { express });
+			const app = goa.createApplication(fakeController, { express });
 
 			const req = {
 					params: {}
@@ -256,7 +256,7 @@ describe('Goa', () => {
 				});
 			}
 
-			const app = goa(fakeController, { express });
+			const app = goa.createApplication(fakeController, { express });
 
 			const req = {
 					params: {}
@@ -276,7 +276,7 @@ describe('Goa', () => {
 				callback(null, {});
 			}
 
-			const app = goa(fakeController, { express });
+			const app = goa.createApplication(fakeController, { express });
 
 			const req = {
 					params: {}
@@ -306,7 +306,7 @@ describe('Goa', () => {
 				});
 			}
 
-			const app = goa(fakeController, { express });
+			const app = goa.createApplication(fakeController, { express });
 
 			const req = {
 					params: {}
@@ -552,7 +552,7 @@ describe('Goa', () => {
 				});
 			}
 
-			const app = goa(fakeController, { express });
+			const app = goa.createApplication(fakeController, { express });
 
 			const req = {
 					params: {}

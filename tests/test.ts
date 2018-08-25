@@ -1,10 +1,28 @@
-import * as goa from '../';
 import * as express from 'express';
+import * as goa from '../index';
 
-const app = goa((name, context, callback) => {
+interface IndexParams {
+	id: number;
+	format: 'json' | 'xml';
+}
+
+const shouldNeverHappen = (x: never) => {};
+
+const app: goa.GoaApplication = goa.createApplication((name, context, callback) => {
 	callback(null, {
-		index: () => {
-			goa.json({}, { contentType: 'text/plain' });
+		index: (params: goa.ActionParams<IndexParams>, send: goa.Send) => {
+			switch (params.format) {
+				case 'json':
+					send(goa.json({ ...params }, { contentType: 'text/plain' }));
+					break;
+				case 'xml':
+					send(goa.action(`<id>${params.id}</id>`, 'text/xml'));
+					break;
+				default:
+					shouldNeverHappen(params.format);
+					send(goa.error(`Invalid format: ${params.format}`, 400));
+					break;
+			}
 		}
 	});
 }, { express });
@@ -33,5 +51,8 @@ goa.view('lol', () => {
 		hello: 'world'
 	}
 });
+goa.empty('text/plain');
+goa.action('hello world', 'text/plain', 400);
+goa.action('hello world', 'text/plain', { status: 400 });
 
 app.listen(3000);

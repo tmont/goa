@@ -1,4 +1,4 @@
-const should = require('should');
+require('should');
 const bodyParser = require('body-parser');
 const express = require('express');
 const async = require('async');
@@ -68,7 +68,7 @@ describe('Integration with Express', () => {
 	}
 
 	it('should send content', (done) => {
-		const app = goa(createController, { express });
+		const app = goa.createApplication(createController, { express });
 		setExpressOptions(app);
 		app.get('/content', { controller: 'foo', action: 'content' });
 		server = app.listen(port);
@@ -80,7 +80,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should render view', (done) => {
-		const app = goa(createController, { express });
+		const app = goa.createApplication(createController, { express });
 		setExpressOptions(app);
 		app.get('/view', { controller: 'foo', action: 'view' });
 		server = app.listen(port);
@@ -92,7 +92,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should use express error handler for ErrorResult', (done) => {
-		const app = goa(createController, { express });
+		const app = goa.createApplication(createController, { express });
 		setExpressOptions(app);
 
 		app.get('/error', { controller: 'foo', action: 'error' });
@@ -110,7 +110,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should send file', (done) => {
-		const app = goa(createController, { express });
+		const app = goa.createApplication(createController, { express });
 		setExpressOptions(app);
 		app.get('/file', { controller: 'foo', action: 'file' });
 		server = app.listen(port);
@@ -122,7 +122,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should download file', (done) => {
-		const app = goa(createController, { express });
+		const app = goa.createApplication(createController, { express });
 		setExpressOptions(app);
 		app.get('/download', { controller: 'foo', action: 'download' });
 		server = app.listen(port);
@@ -135,7 +135,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should download file from url', (done) => {
-		const app = goa(createController, { express });
+		const app = goa.createApplication(createController, { express });
 		setExpressOptions(app);
 		app.get('/download', { controller: 'foo', action: 'downloadFromUrl' });
 		app.get('/file', { controller: 'foo', action: 'file' });
@@ -150,7 +150,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should download file from url and handle error', (done) => {
-		const app = goa(createController, { express });
+		const app = goa.createApplication(createController, { express });
 		setExpressOptions(app);
 		app.get('/download', { controller: 'foo', action: 'downloadFromUrl' });
 		app.get('/file', { controller: 'foo', action: 'fileError' });
@@ -164,7 +164,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should redirect', (done) => {
-		const app = goa(createController, { express });
+		const app = goa.createApplication(createController, { express });
 		setExpressOptions(app);
 		app.get('/redirect', { controller: 'foo', action: 'redirect' });
 		server = app.listen(port);
@@ -177,7 +177,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should get controller and action from req.params', (done) => {
-		const app = goa((name, context, callback) => {
+		const app = goa.createApplication((name, context, callback) => {
 			name.should.equal('bar');
 			callback(null, {
 				content: (params, send) => {
@@ -196,7 +196,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should expose express prototype', (done) => {
-		const app = goa((name, context, callback) => {
+		const app = goa.createApplication((name, context, callback) => {
 			callback(null, {
 				sexyBody: (params, send) => {
 					params.should.have.property('foo', 'bar');
@@ -230,7 +230,7 @@ describe('Integration with Express', () => {
 	});
 
 	it('should support express.all()', (done) => {
-		const app = goa((name, context, callback) => {
+		const app = goa.createApplication((name, context, callback) => {
 			callback(null, {
 				all: (params, send) => {
 					send(goa.action(context.req.method));
@@ -280,7 +280,7 @@ describe('Integration with Express', () => {
 			}
 
 			it('should handle ' + method.toUpperCase() + ' request', (done) => {
-				const app = goa((params, context, callback) => {
+				const app = goa.createApplication((params, context, callback) => {
 					callback(null, {
 						index: (params, send) => {
 							send(goa.action('oh hai there!'));
