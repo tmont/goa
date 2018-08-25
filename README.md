@@ -25,7 +25,8 @@ Goa is a drop-in replacement for [Express](https://github.com/visionmedia/expres
 all Goa apps are Express apps.
 
 As of v3.0.0, the interface to create an application changed from `goa(...)`
-to `goa.createApplication(...)`.
+to `goa.createApplication(...)`. Also, since v3.0.0 promises are supported in both
+controller actions and controller factories.
 
 As of v2.0.0, `express` is now a peer dependency which means you must supply
 your own version of `express` to goa.
@@ -40,6 +41,11 @@ const goa = require('goa');
 const createController = (name, context, callback) => callback(null, {
 	index: (params, send) => send(goa.action('yay!'))
 });
+
+// or, using a promise
+const createControllerViaPromise = async (name, context) => {
+	return await getMyController();
+};
 
 const app = goa.createApplication(createController, { express });
 ```
@@ -176,6 +182,16 @@ class MyController {
 	        send(goa.redirect(`/edit/${result.id}`));
 	    });
 	}
+	
+	// also supports promises
+	async savePromise(params, send) {
+		try {
+			const result = await this.db.insert(record);
+			send(goa.redirect(`/edit/${result.id}`));
+		} catch (e) {
+			send(goa.error(e));
+		}
+	}
 }
 ```
 
@@ -214,6 +230,16 @@ class MyController {
 	        send(goa.redirect(`/edit/${result.id}`));
 	    });
 	}
+	
+	public async savePromise(params: goa.ActionParams<SaveParams>, send: goa.Send) {
+        try {
+        	const record: any = { content: params.content };
+            const result = await this.db.insert(record);
+            send(goa.redirect(`/edit/${result.id}`));
+        } catch (e) {
+            send(goa.error(e));
+        }
+    }
 }
 ```
 

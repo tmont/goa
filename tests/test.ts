@@ -27,6 +27,8 @@ const app: goa.GoaApplication = goa.createApplication((name, context, callback) 
 	});
 }, { express });
 
+const app2 = goa.createApplication(async (name, context) => ({}), { express });
+
 app.get('foo', { controller: 'Foo' });
 app.post('foo', { controller: 'Foo', action: 'bar' });
 app.put('foo', { controller: 'Foo', action: 'bar' });

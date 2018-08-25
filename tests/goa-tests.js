@@ -684,4 +684,95 @@ describe('Goa', () => {
 			});
 		});
 	});
+
+	describe('promises', () => {
+		function createResponse(contentType, content, done) {
+			return {
+				set: (name, value) => {
+					name.should.equal('Content-Type');
+					value.should.equal(contentType);
+				},
+				send: (value) => {
+					value.should.eql(content);
+					done();
+				}
+			}
+		}
+
+		it('should handle controllers that returns a promise', (done) => {
+			const myController = {
+				index: async (params, send) => {
+					await new Promise((resolve) => {
+						setTimeout(() => resolve(), 100);
+					});
+
+					send(goa.action());
+				}
+			};
+
+			const app = goa.createApplication(
+				(name, context, callback) => callback(null, myController),
+				{ express }
+			);
+			const res = {
+				set: () => {},
+				send: () => done()
+			};
+
+			const next = () => done('next() should not have been called');
+			app.middleware({controller: 'whatever', action: 'index'})({params: {}}, res, next);
+		});
+
+		it('should handle controllers that returns a rejected promise', (done) => {
+			const myController = {
+				index: async (params, send) => {
+					throw new Error('sux');
+				}
+			};
+
+			const app = goa.createApplication(
+				(name, context, callback) => callback(null, myController),
+				{express}
+			);
+			const res = {
+				set: () => {}
+			};
+
+			const next = (err) => {
+				err.should.have.property('message', 'sux');
+				done();
+			};
+			app.middleware({controller: 'whatever', action: 'index'})({params: {}}, res, next);
+		});
+
+		it('should allow controller factory to return a promise', (done) => {
+			const myController = {
+				index: (params, send) => {
+					params.should.eql({
+						controller: 'whatever',
+						action: 'index'
+					});
+					done();
+				}
+			};
+
+			const app = goa.createApplication(async (name, context) => {
+				await new Promise(resolve => setTimeout(resolve, 100));
+				return myController;
+			}, { express });
+
+			const next = () => done('next() should not have been called');
+			app.middleware({ controller: 'whatever', action: 'index' })({ params: {} }, {}, next);
+		});
+
+		it('should allow controller factory to return a rejected promise', (done) => {
+			const app = goa.createApplication(async () => { throw new Error('fail'); }, {express});
+
+			const next = (err) => {
+				err.should.have.property('message', 'fail');
+				done();
+			};
+			app.middleware({controller: 'whatever', action: 'index'})({params: {}}, {}, next);
+		});
+	});
 });

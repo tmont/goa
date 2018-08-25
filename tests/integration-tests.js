@@ -269,6 +269,52 @@ describe('Integration with Express', () => {
 		async.eachSeries([ 'GET', 'OPTIONS', 'POST', 'PUT', 'DELETE' ], doRequest, done);
 	});
 
+	describe('promises', () => {
+		it('should properly handle promises', (done) => {
+			const myController = {
+				async index(params, send) {
+					await new Promise(resolve => setTimeout(resolve, 100));
+					send(goa.action('hello world'));
+				}
+			};
+			const controllerFactory = (name, context) => {
+				return Promise.resolve(myController);
+			};
+			const app = goa.createApplication(controllerFactory, {express});
+			setExpressOptions(app);
+			app.get('/content', {controller: 'foo', action: 'index'});
+			server = app.listen(port);
+
+			sendGetRequest('/content', (res, body) => {
+				body.should.equal('hello world');
+				done();
+			});
+		});
+
+		it('should properly handle promise rejections', (done) => {
+			const myController = {
+				async index(params, send) {
+					throw new Error('fail');
+				}
+			};
+			const controllerFactory = (name, context) => {
+				return Promise.resolve(myController);
+			};
+			const app = goa.createApplication(controllerFactory, {express});
+			setExpressOptions(app);
+			app.get('/content', {controller: 'foo', action: 'index'});
+			app.use((err, req, res, next) => {
+				res.send(`error: ${err.message}`);
+			});
+			server = app.listen(port);
+
+			sendGetRequest('/content', (res, body) => {
+				body.should.equal('error: fail');
+				done();
+			});
+		});
+	});
+
 	describe('different request methods', () => {
 		const methods = http.METHODS;
 

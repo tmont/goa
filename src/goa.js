@@ -20,14 +20,20 @@ const middleware = (controllerFactory, actionParams, options) => {
 		const action = params.action || options.defaultAction;
 
 		const context = { req, res };
-		controllerFactory(params.controller, context, (err, controller) => {
+		let controllerHandled = false;
+		const handleController = (err, controller) => {
+			if (controllerHandled) {
+				return;
+			}
+
+			controllerHandled = true;
 			if (err || !controller) {
 				next(err || new Error('Unable to create controller "' + controllerName + '"'));
 				return;
 			}
 
 			const runAction = (actionName) => {
-				controller[actionName](params, function(result) {
+				const actionResult = controller[actionName](params, function(result) {
 					if (!result || !result.execute) {
 						next(new Error(`Action "${controllerName}.${action}" does not return a result object`));
 						return;
@@ -42,6 +48,10 @@ const middleware = (controllerFactory, actionParams, options) => {
 						res.send(str);
 					});
 				});
+
+				if (actionResult && typeof(actionResult.then) === 'function') {
+					actionResult.then(() => {}, next);
+				}
 			};
 
 			if (typeof(controller[action]) === 'function') {
@@ -56,7 +66,23 @@ const middleware = (controllerFactory, actionParams, options) => {
 			}
 
 			next(new Error(`Unable to find action method "${action}" on controller "${controllerName}"`));
-		});
+		};
+
+		let controllerPromise;
+		try {
+			controllerPromise = controllerFactory(params.controller, context, handleController);
+		} catch (e) {
+			handleController(e);
+			return;
+		}
+
+		if (controllerPromise && typeof(controllerPromise.then) === 'function') {
+			controllerPromise
+				.then(
+					controller => handleController(null, controller),
+					err => handleController(err)
+				);
+		}
 	}
 };
 
