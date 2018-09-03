@@ -158,7 +158,7 @@ describe('Goa', () => {
 					index: (params, send) => {
 						should.exist(params);
 						send({
-							execute: (res, next) => {
+							execute: () => {
 								done();
 							}
 						});
@@ -186,11 +186,7 @@ describe('Goa', () => {
 				callback(null, {
 					bar: (params, callback) => {
 						should.exist(params);
-						callback({
-							execute: (res, next) => {
-								done();
-							}
-						});
+						callback({ execute: () => done() });
 					}
 				});
 			}
@@ -297,11 +293,7 @@ describe('Goa', () => {
 				callback(null, {
 					handleUnknownAction: (params, callback) => {
 						should.exist(params);
-						callback({
-							execute: (res, next) => {
-								done();
-							}
-						});
+						callback({ execute: () => done() });
 					}
 				});
 			}
@@ -686,19 +678,6 @@ describe('Goa', () => {
 	});
 
 	describe('promises', () => {
-		function createResponse(contentType, content, done) {
-			return {
-				set: (name, value) => {
-					name.should.equal('Content-Type');
-					value.should.equal(contentType);
-				},
-				send: (value) => {
-					value.should.eql(content);
-					done();
-				}
-			}
-		}
-
 		it('should handle controllers that returns a promise', (done) => {
 			const myController = {
 				index: async (params, send) => {
@@ -725,7 +704,7 @@ describe('Goa', () => {
 
 		it('should handle controllers that returns a rejected promise', (done) => {
 			const myController = {
-				index: async (params, send) => {
+				index: async () => {
 					throw new Error('sux');
 				}
 			};
@@ -747,7 +726,7 @@ describe('Goa', () => {
 
 		it('should allow controller factory to return a promise', (done) => {
 			const myController = {
-				index: (params, send) => {
+				index: (params) => {
 					params.should.eql({
 						controller: 'whatever',
 						action: 'index'
@@ -756,7 +735,7 @@ describe('Goa', () => {
 				}
 			};
 
-			const app = goa.createApplication(async (name, context) => {
+			const app = goa.createApplication(async () => {
 				await new Promise(resolve => setTimeout(resolve, 100));
 				return myController;
 			}, { express });
@@ -773,6 +752,50 @@ describe('Goa', () => {
 				done();
 			};
 			app.middleware({controller: 'whatever', action: 'index'})({params: {}}, {}, next);
+		});
+
+		it('should handle non-rejection exceptions when running action method', (done) => {
+			const myController = {
+				index: () => {
+					throw new Error('sux');
+				}
+			};
+
+			const app = goa.createApplication(
+				(name, context, callback) => callback(null, myController),
+				{express}
+			);
+			const res = {
+				set: () => {}
+			};
+
+			const next = (err) => {
+				err.should.have.property('message', 'sux');
+				done();
+			};
+			app.middleware({controller: 'whatever', action: 'index'})({params: {}}, res, next);
+		});
+
+		it('should handle non-rejection exceptions when running unknown action method', (done) => {
+			const myController = {
+				handleUnknownAction: () => {
+					throw new Error('sux');
+				}
+			};
+
+			const app = goa.createApplication(
+				(name, context, callback) => callback(null, myController),
+				{express}
+			);
+			const res = {
+				set: () => {}
+			};
+
+			const next = (err) => {
+				err.should.have.property('message', 'sux');
+				done();
+			};
+			app.middleware({controller: 'whatever', action: 'index'})({params: {}}, res, next);
 		});
 	});
 });

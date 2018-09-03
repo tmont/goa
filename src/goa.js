@@ -54,14 +54,19 @@ const middleware = (controllerFactory, actionParams, options) => {
 				}
 			};
 
-			if (typeof(controller[action]) === 'function') {
-				runAction(action);
-				return;
-			}
+			try {
+				if (typeof(controller[action]) === 'function') {
+					runAction(action);
+					return;
+				}
 
-			const unknownActionName = 'handleUnknownAction';
-			if (typeof(controller[unknownActionName]) === 'function') {
-				runAction(unknownActionName);
+				const unknownActionName = 'handleUnknownAction';
+				if (typeof(controller[unknownActionName]) === 'function') {
+					runAction(unknownActionName);
+					return;
+				}
+			} catch (e) {
+				next(e);
 				return;
 			}
 
