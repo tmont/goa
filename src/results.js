@@ -61,6 +61,9 @@ class FileResult {
 		if (externalMatch) {
 			const pipe = (httpRes) => {
 				res.statusCode = httpRes.statusCode;
+				Object.keys(httpRes.headers).forEach((name) => {
+					res.setHeader(name, httpRes.headers[name]);
+				});
 				if (fileName) {
 					res.setHeader('Content-Disposition', 'attachment; filename="' + fileName + '"');
 				}

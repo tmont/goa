@@ -40,11 +40,18 @@ describe('Integration with Express', () => {
 			file: (params, send) => {
 				send(goa.file(__dirname + '/files/file.txt'));
 			},
+			fileWithCustomHeaders: (params, send) => {
+				context.res.setHeader('X-My-Custom-Header', 'Hello world');
+				send(goa.file(__dirname + '/files/file.txt'));
+			},
 			download: (params, send) => {
 				send(goa.file(__dirname + '/files/file.txt', { fileName: 'lol.txt' }));
 			},
 			downloadFromUrl: (params, send) => {
 				send(goa.file('http://localhost:9999/file', { fileName: 'lol.txt' }));
+			},
+			reverseProxy: (params, send) => {
+				send(goa.file('http://localhost:9999/file'));
 			},
 			fileError: (params, send) => {
 				send(goa.error('lolz'));
@@ -144,6 +151,24 @@ describe('Integration with Express', () => {
 		sendGetRequest('/download', (res, body) => {
 			res.statusCode.should.equal(200);
 			res.headers.should.have.property('content-disposition', 'attachment; filename="lol.txt"');
+			body.should.equal('this is a file');
+			done();
+		});
+	});
+
+	it('should reverse proxy remote url', (done) => {
+		const app = goa.createApplication(createController, {express});
+		setExpressOptions(app);
+		app.get('/proxy', {controller: 'foo', action: 'reverseProxy'});
+		app.get('/file', {controller: 'foo', action: 'fileWithCustomHeaders'});
+		server = app.listen(port);
+
+		sendGetRequest('/proxy', (res, body) => {
+			res.statusCode.should.equal(200);
+			res.headers.should.have.property('x-my-custom-header', 'Hello world');
+			res.headers.should.have.property('content-type', 'text/plain; charset=UTF-8');
+			res.headers.should.have.property('content-length', '14');
+			res.headers.should.not.have.property('content-disposition');
 			body.should.equal('this is a file');
 			done();
 		});
