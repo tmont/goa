@@ -1,13 +1,12 @@
 # Goa
 
-[![Build Status](https://travis-ci.org/tmont/goa.png)](https://travis-ci.org/tmont/goa)
-[![NPM version](https://badge.fury.io/js/goa.png)](http://badge.fury.io/js/goa)
-
 Goa is a very small, very simple MVCish framework for Node. I say
 "MVCish" because it's built on top of [Express](http://expressjs.com/)
 which already handles views. So it's more like an "MC" framework.
 Except it doesn't do much with models, either. Whatever. It does
 SOMETHING, I'm sure of it.
+
+[![NPM version](https://badge.fury.io/js/goa.png)](http://badge.fury.io/js/goa)
 
 ## Installation
 Install via [NPM](https://github.com/isaacs/npm): `npm install goa`
