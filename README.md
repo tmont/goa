@@ -20,7 +20,7 @@ Goa sits on top of Express. It's Express all the way down. Except for the top.
 Which is Goa.
 
 ### Do the thing
-Goa is a drop-in replacement for [Express](https://github.com/visionmedia/express):
+Goa is a drop-in replacement for [Express](https://github.com/expressjs/express):
 all Goa apps are Express apps.
 
 As of v3.0.0, the interface to create an application changed from `goa(...)`
