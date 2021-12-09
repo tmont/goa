@@ -104,8 +104,10 @@ declare namespace goa {
 		defaultAction?: string
 	}
 
+	export type ResultExecuteNextFunction = (err?: any, str?: string) => void;
+
 	export interface Result {
-		execute(res: express.Response, next?: express.NextFunction): void;
+		execute(res: express.Response, next?: ResultExecuteNextFunction): void;
 	}
 
 	export interface ActionResult extends Result {
@@ -145,7 +147,7 @@ declare namespace goa {
 		[P in keyof TParams]: TParams[P];
 	};
 
-	export type Send = (result: Result) => void;
+	export type Send = (result: Result, onComplete?: () => (void | Promise<void>)) => void;
 }
 
 declare const goa: goa.Goa;

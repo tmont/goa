@@ -287,7 +287,6 @@ describe('Goa', () => {
 		});
 
 		it('should call unknown action handler if original action does not exist', (done) => {
-
 			function fakeController(name, context, callback) {
 				name.should.equal('foo');
 				callback(null, {
@@ -309,6 +308,230 @@ describe('Goa', () => {
 				};
 
 			app.middleware({controller: 'foo', action: 'bar'})(req, res, next);
+		});
+
+		describe('onComplete callback', () => {
+			it('should call callback after successful request', (done) => {
+				let onComplete = false;
+				let onCompleteError = null;
+
+				const finish = () => {
+					onComplete.should.equal(true);
+					should.equal(onCompleteError, null);
+					done();
+				};
+
+				const execute = (res, callback) => callback();
+
+				function fakeController(name, context, callback) {
+					name.should.equal('foo');
+					context.should.have.property('req');
+					context.should.have.property('res');
+					callback(null, {
+						bar: (params, send) => {
+							send({execute: execute}, (err) => {
+								onComplete = true;
+								onCompleteError = err || null;
+							});
+						}
+					});
+				}
+
+				const app = goa.createApplication(fakeController, {express});
+
+				const req = {
+						params: {}
+					},
+					res = {
+						send: finish,
+					},
+					next = (err) => {
+						done('next() should not have been called: ' + err);
+					};
+				app.middleware({controller: 'foo', action: 'bar'})(req, res, next);
+			});
+
+			it('should ignore thrown errors', (done) => {
+				let onComplete = false;
+				let onCompleteError = null;
+
+				const finish = () => {
+					onComplete.should.equal(true);
+					should.equal(onCompleteError, null);
+					done();
+				};
+
+				const execute = (res, callback) => callback();
+
+				function fakeController(name, context, callback) {
+					name.should.equal('foo');
+					context.should.have.property('req');
+					context.should.have.property('res');
+					callback(null, {
+						bar: (params, send) => {
+							send({execute: execute}, (err) => {
+								onComplete = true;
+								onCompleteError = err || null;
+								throw new Error('this should be completely ignored');
+							});
+						}
+					});
+				}
+
+				const app = goa.createApplication(fakeController, {express});
+
+				const req = {
+						params: {}
+					},
+					res = {
+						send: finish,
+					},
+					next = (err) => {
+						done('next() should not have been called: ' + err);
+					};
+				app.middleware({controller: 'foo', action: 'bar'})(req, res, next);
+			});
+
+			it('should pass along error after failed request', (done) => {
+				let onComplete = false;
+				let onCompleteError = null;
+				const error = new Error('oh no!');
+
+				const finish = () => {
+					done('res.send() should not have been called');
+				};
+
+				const execute = (res, callback) => callback(error);
+
+				function fakeController(name, context, callback) {
+					name.should.equal('foo');
+					context.should.have.property('req');
+					context.should.have.property('res');
+					callback(null, {
+						bar: (params, send) => {
+							send({execute: execute}, (err) => {
+								onComplete = true;
+								onCompleteError = err || null;
+							});
+						}
+					});
+				}
+
+				const app = goa.createApplication(fakeController, {express});
+
+				const req = {
+						params: {}
+					},
+					res = {
+						send: finish,
+					},
+					next = (err) => {
+						onComplete.should.equal(true);
+						should.equal(onCompleteError, err);
+						should.equal(err, error);
+						done();
+
+					};
+				app.middleware({controller: 'foo', action: 'bar'})(req, res, next);
+			});
+
+			describe('promises', () => {
+				it('should wait for promise to be fulfilled after successful request', (done) => {
+					let onComplete = false;
+					let onCompleteError = null;
+					let promiseFulfilled = false;
+
+					const finish = () => {
+						onComplete.should.equal(true);
+						should.equal(onCompleteError, null);
+						promiseFulfilled.should.equal(true);
+						done();
+					};
+
+					const execute = (res, callback) => callback();
+
+					function fakeController(name, context, callback) {
+						name.should.equal('foo');
+						context.should.have.property('req');
+						context.should.have.property('res');
+						callback(null, {
+							bar: (params, send) => {
+								send({execute: execute}, (err) => {
+									onComplete = true;
+									onCompleteError = err || null;
+									return new Promise((resolve) => {
+										setTimeout(() => {
+											promiseFulfilled = true;
+											resolve();
+										}, 20);
+									});
+								});
+							}
+						});
+					}
+
+					const app = goa.createApplication(fakeController, {express});
+
+					const req = {
+							params: {}
+						},
+						res = {
+							send: finish,
+						},
+						next = (err) => {
+							done('next() should not have been called: ' + err);
+						};
+					app.middleware({controller: 'foo', action: 'bar'})(req, res, next);
+				});
+
+				it('should ignore promise rejections', (done) => {
+					let onComplete = false;
+					let onCompleteError = null;
+					let promiseFulfilled = false;
+
+					const finish = () => {
+						onComplete.should.equal(true);
+						should.equal(onCompleteError, null);
+						promiseFulfilled.should.equal(true);
+						done();
+					};
+
+					const execute = (res, callback) => callback();
+
+					function fakeController(name, context, callback) {
+						name.should.equal('foo');
+						context.should.have.property('req');
+						context.should.have.property('res');
+						callback(null, {
+							bar: (params, send) => {
+								send({execute: execute}, (err) => {
+									onComplete = true;
+									onCompleteError = err || null;
+									return new Promise((resolve, reject) => {
+										setTimeout(() => {
+											promiseFulfilled = true;
+											reject();
+										}, 20);
+									});
+								});
+							}
+						});
+					}
+
+					const app = goa.createApplication(fakeController, {express});
+
+					const req = {
+							params: {}
+						},
+						res = {
+							send: finish,
+						},
+						next = (err) => {
+							done('next() should not have been called: ' + err);
+						};
+					app.middleware({controller: 'foo', action: 'bar'})(req, res, next);
+				});
+			});
 		});
 	});
 

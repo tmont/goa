@@ -23,6 +23,18 @@ const app: goa.GoaApplication = goa.createApplication((name, context, callback) 
 					send(goa.error(`Invalid format: ${params.format}`, 400));
 					break;
 			}
+		},
+
+		onComplete: (params: goa.ActionParams<any>, send: goa.Send) => {
+			send(goa.action(), (): void => {
+				console.log('on complete');
+			});
+		},
+
+		onCompletePromise: (params: goa.ActionParams<any>, send: goa.Send) => {
+			send(goa.action(), async (): Promise<void> => {
+				console.log('on complete w/ promise');
+			});
 		}
 	});
 }, { express });

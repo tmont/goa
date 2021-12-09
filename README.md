@@ -257,6 +257,43 @@ method on your controller.
 }
 ```
 
+#### Hooking into rendering process
+The `send` argument also accepts an `onComplete` callback:
+
+```javascript
+{
+    myAction: (params, send) => {
+        const renderStart = Date.now();
+        send(goa.view('some/view', { hello: 'world' }), (err) => {
+            if (err) {
+                console.error(`rendering encountered an error: ${err.message}`);
+            }
+            const renderElapsed = Date.now() - renderStart;
+            console.log(`rendering took ${renderElapsed}ms`);
+        });
+    }
+}
+```
+
+Note that any errors thrown from the `onComplete` callback will be ignored.
+
+The `onComplete` callback can return a promise. Note that the promise will resolve
+_before_ sending the response back to the client, so it's not recommended to perform
+any heavy tasks inside the `onComplete` callback as it can hide slowness from the
+normal program flow. Errors resulting from a rejected promise are ignored.
+
+```javascript
+{
+    myAction: (params, send) => {
+        const renderStart = Date.now();
+        send(goa.view('some/view', { hello: 'world' }), async (err) => {
+            const renderElapsed = Date.now() - renderStart;
+            await db.execute('INSERT INTO render_times (timestamp, elapsed) VALUES (?, ?)', Date.now(), renderElapsed);
+        });
+    }
+}
+```
+
 ### Putting it all together
 So, to set up your routes to use the controller above, you would do something like this:
 

@@ -33,19 +33,36 @@ const middleware = (controllerFactory, actionParams, options) => {
 			}
 
 			const runAction = (actionName) => {
-				const actionResult = controller[actionName](params, function(result) {
+				const actionResult = controller[actionName](params, function(result, onComplete) {
 					if (!result || !result.execute) {
 						next(new Error(`Action "${controllerName}.${action}" does not return a result object`));
 						return;
 					}
 
 					result.execute(res, (err, str) => {
-						if (err) {
-							next(err);
-							return;
+						let onCompletePromise;
+						if (typeof(onComplete) === 'function') {
+							try {
+								onCompletePromise = onComplete(err, str);
+							} catch (err) {
+								// ignore errors
+							}
 						}
 
-						res.send(str);
+						const sendResponse = () => {
+							if (err) {
+								next(err);
+								return;
+							}
+
+							res.send(str);
+						};
+
+						if (onCompletePromise && typeof(onCompletePromise.then) === 'function') {
+							onCompletePromise.then(sendResponse).catch(sendResponse);
+						} else {
+							sendResponse();
+						}
 					});
 				});
 
