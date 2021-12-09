@@ -8,9 +8,6 @@
 		"express"
 	],
 	"license": "MIT",
-	"directories": {
-		"lib": "src"
-	},
 	"files": [
 		"index.js",
 		"index.d.ts",
