@@ -173,13 +173,13 @@ class MyController {
 	save(params, send) {
 		const record = { content: params.content };
 		this.db.insert(record, (err, result) => {
-	        if (err) {
-	            send(goa.error(err));
-	            return;
-	        }
+			if (err) {
+				send(goa.error(err));
+				return;
+			}
 	
-	        send(goa.redirect(`/edit/${result.id}`));
-	    });
+			send(goa.redirect(`/edit/${result.id}`));
+		});
 	}
 	
 	// also supports promises
@@ -221,24 +221,24 @@ class MyController {
 	save(params: goa.ActionParams<SaveParams>, send: goa.Send) {
 		const record: any = { content: params.content };
 		this.db.insert(record, (err, result) => {
-	        if (err) {
-	            send(goa.error(err));
-	            return;
-	        }
+			if (err) {
+				send(goa.error(err));
+				return;
+			}
 	
-	        send(goa.redirect(`/edit/${result.id}`));
-	    });
+			send(goa.redirect(`/edit/${result.id}`));
+		});
 	}
 	
 	public async savePromise(params: goa.ActionParams<SaveParams>, send: goa.Send) {
-        try {
-        	const record: any = { content: params.content };
-            const result = await this.db.insert(record);
-            send(goa.redirect(`/edit/${result.id}`));
-        } catch (e) {
-            send(goa.error(e));
-        }
-    }
+		try {
+			const record: any = { content: params.content };
+			const result = await this.db.insert(record);
+			send(goa.redirect(`/edit/${result.id}`));
+		} catch (e) {
+			send(goa.error(e));
+		}
+	}
 }
 ```
 
@@ -262,16 +262,16 @@ The `send` argument also accepts an `onComplete` callback:
 
 ```javascript
 {
-    myAction: (params, send) => {
-        const renderStart = Date.now();
-        send(goa.view('some/view', { hello: 'world' }), (err) => {
-            if (err) {
-                console.error(`rendering encountered an error: ${err.message}`);
-            }
-            const renderElapsed = Date.now() - renderStart;
-            console.log(`rendering took ${renderElapsed}ms`);
-        });
-    }
+	myAction: (params, send) => {
+		const renderStart = Date.now();
+		send(goa.view('some/view', { hello: 'world' }), (err) => {
+			if (err) {
+				console.error(`rendering encountered an error: ${err.message}`);
+			}
+			const renderElapsed = Date.now() - renderStart;
+			console.log(`rendering took ${renderElapsed}ms`);
+		});
+	}
 }
 ```
 
@@ -284,13 +284,13 @@ normal program flow. Errors resulting from a rejected promise are ignored.
 
 ```javascript
 {
-    myAction: (params, send) => {
-        const renderStart = Date.now();
-        send(goa.view('some/view', { hello: 'world' }), async (err) => {
-            const renderElapsed = Date.now() - renderStart;
-            await db.execute('INSERT INTO render_times (timestamp, elapsed) VALUES (?, ?)', Date.now(), renderElapsed);
-        });
-    }
+	myAction: (params, send) => {
+		const renderStart = Date.now();
+		send(goa.view('some/view', { hello: 'world' }), async (err) => {
+			const renderElapsed = Date.now() - renderStart;
+			await db.execute('INSERT INTO render_times (timestamp, elapsed) VALUES (?, ?)', Date.now(), renderElapsed);
+		});
+	}
 }
 ```
 
